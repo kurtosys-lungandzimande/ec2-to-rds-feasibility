@@ -80,11 +80,27 @@ RDS does not support Database Mail. Before migration, this needs to be replaced 
 
 ### The cost case
 
-The server currently costs approximately **$4,110/month** for both nodes combined (confirmed from real AWS billing data on EW1R-REP-01). On RDS with BYOL (we own the licenses — confirmed), the equivalent would cost approximately **$2,000–$2,500/month** — a saving of **$1,600–$2,100/month**.
+The current EC2 spend is approximately **$800–$950/month** combined for both nodes — confirmed from real AWS billing data on EW1R-REP-01. This is the post-RI figure. Before the Reserved Instance was purchased on 23 April 2025, the combined spend was ~$2,900–$3,700/month.
+
+On RDS with BYOL (we own the licenses — confirmed), the equivalent Multi-AZ configuration would cost approximately **$1,359–$1,389/month** on-demand — around **$409–$589/month more expensive** than current EC2 spend. With a 1-year RDS Reserved Instance, the RDS cost drops to ~$1,135–$1,165/month, which is still ~$185–$365/month more than current EC2 spend.
+
+**The migration timing is constrained by the RI.** A Reserved Instance is almost certainly in place on ew2p-mssql-01 — purchased 23 April 2025, most likely a 3-year term expiring April 2028. Migrating before that date means paying for both the unused RI and RDS compute simultaneously. The financially optimal migration window is **at or after April 2028**. Technical preparation work (resolving CLR blockers, moving SSRS, replacing Database Mail) should happen before that date so the cutover can happen cleanly when the RI expires.
+
+**If the business wants to migrate before April 2028 — the trade-off:**
+
+The RI is a pre-paid commitment. That money is gone regardless of whether the EC2 instance keeps running or not — Reserved Instances are non-refundable and non-cancellable. Migrating early means Kurtosys pays for both simultaneously until April 2028.
+
+The only ways to recover value from the RI early are:
+
+| Option | Trade-off |
+|---|---|
+| Wait until April 2028 | Cleanest — no double-paying, no extra complexity. Technical prep happens now, cutover happens at expiry |
+| Repurpose the EC2 for another workload | RI gets used — but now managing EC2 AND RDS simultaneously. OS patching burden stays. Operational complexity increases. Need a genuine workload that justifies r6i.2xlarge (8 vCPU, 64 GB RAM, SQL Server Enterprise). If no real workload exists, this is just running a large idle box to avoid a sunk cost |
+| Sell the RI on AWS Marketplace | Partial recovery possible — but SQL Server RIs are harder to sell than Linux, and recovery will be less than the remaining term value |
+
+> **Recommendation:** Do not repurpose the EC2 unless there is a genuine workload already waiting for it. Creating operational overhead to justify a sunk cost is a false saving. The right answer is to start technical preparation now and target April 2028 for cutover.
 
 **Why we own the licenses (BYOL):** BYOL stands for Bring Your Own License. It means Kurtosys purchased SQL Server Enterprise licenses directly from Microsoft. When you run on EC2 or RDS with BYOL, you only pay AWS for the compute and storage — the license cost does not appear on the AWS bill because you already paid Microsoft for it. We confirmed this from the AWS cost data — a line item called `LICENSE-EXEMPTION-KSYS-MSSQL-PASSIVE-NODE` appears on the secondary node. AWS only applies this exemption when a customer is running BYOL with active Software Assurance. This is the proof.
-
-One note: there was a cost drop on the primary node from ~$103/day to ~$9/day around October/November 2025. This needs to be confirmed — if the instance was legitimately resized, the current baseline is ~$1,245/month and the saving on RDS narrows to ~$0–$500/month. This must be clarified before presenting the cost case.
 
 ---
 
@@ -104,7 +120,8 @@ One note: there was a cost drop on the primary node from ~$103/day to ~$9/day ar
 | Question | Why It Matters |
 |---|---|
 | Has AWS License Mobility been formally activated for RDS? | Administrative step — not a blocker, but must be initiated before migration begins |
-| What is the current cost of ew2p-mssql-01 — was it resized in Oct/Nov 2025? | Affects the cost saving calculation |
+| Confirm RI term and expiry for ew2p-mssql-01 — believed to be 3-year purchased 23 Apr 2025, expiring Apr 2028 | Determines the earliest cost-neutral migration window |
+| Confirm whether ew2p-mssql-02 is also on a Reserved Instance | Could affect combined cost baseline and migration timing |
 | Who owns SECURITYBENEFIT and RWC — rewrite CLR or leave on EC2? | Determines whether Phase 3 is a rewrite project or a permanent split |
 | Who owns SSRS — move to EC2 or migrate to Power BI? | Determines Phase 1 effort and timeline |
 

@@ -237,10 +237,10 @@ A straight lift-and-shift of SQL Server from EC2 to RDS is not possible in its c
 | Q2 | Which recent platform changes removed the historical blockers? | Theme A cannot assess blockers without knowing what changed | Open — needs Platform Engineering input |
 | Q3 | Who are the application/service owners for each instance? | Dependency mapping requires their input | Open |
 | Q4 | Do we have access to all EC2 instances to run discovery queries directly? | Blocks all of Theme A | **Closed** — access confirmed, queries validated on REL 2026-07-23 |
-| Q5 | What is the current EC2 cost per instance — do we have Cost Explorer access? | Required for Theme B cost comparison | Open — to be confirmed with billing team |
+| Q5 | What is the current EC2 cost per instance — do we have Cost Explorer access? | Required for Theme B cost comparison | **Closed** — confirmed from `MON_AWS_Entity_Cost` and `INFO_AWS_EC2_Detail` in DBA_VCC_AWS on EW1R-REP-01. No Cost Explorer access needed. See cost-comparison.md. |
 | Q6 | Are any instances using SQL Server features known to be unsupported on RDS? | Early signal for compatibility blockers | **Closed** — SSIS, SSRS, CmdExec/PowerShell steps, Windows logins all identified on REL |
-| Q7 | What SQL Server versions and editions are currently running across all instances? | Determines RDS engine version options | **Partial** — REL confirmed SQL Server 2019 Developer Edition. PRD edition TBC |
-| Q8 | Is BYOL licensing already in place or are instances running License Included on EC2? | Required for licensing comparison in Theme B | Open |
+| Q7 | What SQL Server versions and editions are currently running across all instances? | Determines RDS engine version options | **Closed** — SQL Server 2019 (15.0.4455.2) CU32, Enterprise Edition confirmed on PRD via OPENQUERY through EW1R-REP-01. REL is Developer Edition. |
+| Q8 | Is BYOL licensing already in place or are instances running License Included on EC2? | Required for licensing comparison in Theme B | **Closed** — BYOL confirmed from LICENSE-EXEMPTION-KSYS-MSSQL-PASSIVE-NODE line item in AWS cost data for ew2p-mssql-02. See inventory.md. |
 
 ---
 

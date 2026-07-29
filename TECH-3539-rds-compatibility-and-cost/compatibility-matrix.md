@@ -117,28 +117,28 @@ To use existing licenses on RDS, AWS License Mobility must be formally activated
 
 ### RDS Cost Estimate — BYOL, db.r6i.2xlarge, Multi-AZ
 
-> Indicative figures based on confirmed instance type (r6i.2xlarge) and BYOL licensing. Exact figures to be confirmed via AWS Pricing Calculator.
+> Confirmed via AWS Pricing Calculator — eu-west-2, db.r6i.2xlarge, Multi-AZ, BYOL, gp3 2,680 GB. EC2 baseline confirmed from `MON_AWS_Entity_Cost` and `INFO_AWS_EC2_Detail` in DBA_VCC_AWS on EW1R-REP-01 (real AWS billing data collected daily). Full breakdown in [cost-comparison.md](./cost-comparison.md).
 
 | Component | Cost/month | Notes |
 |---|---|---|
-| RDS db.r6i.2xlarge — primary (BYOL) | ~$800–$900 | Compute only — no license cost |
-| RDS Multi-AZ standby | ~$800–$900 | Replaces ew2p-mssql-02 + Always On |
-| Storage — gp3, 2,680 GB | ~$270 | $0.10/GB-month on RDS gp3 |
-| Automated backup storage | ~$50–$100 | Depends on retention period |
-| **Total estimated** | **~$2,000–$2,500/month** | Both nodes combined |
+| RDS db.r6i.2xlarge — Multi-AZ (BYOL) | ~$714 | Single Multi-AZ rate covers both primary and standby — compute only, no license cost on AWS bill |
+| Storage — gp3, 2,680 GB | ~$370 | $0.138/GB-month on RDS gp3 — billed once for Multi-AZ |
+| Automated backup storage — 2,680 GB | ~$255 | First 100% of DB size free — overage at $0.095/GB-month |
+| **Total estimated** | **~$1,339–$1,389/month** | Both nodes via Multi-AZ — on-demand pricing |
+
+> **Correction:** An earlier estimate of $2,000–$2,500/month doubled per-node compute. Multi-AZ on RDS is billed as a single instance at the Multi-AZ rate — storage and backup are charged once. Corrected figure is ~$1,339–$1,389/month on-demand.
 
 ### EC2 vs RDS Comparison
 
-| Item | EC2 (2024 baseline) | RDS BYOL Estimate | Saving |
+| Item | EC2 (2024 baseline) | RDS BYOL On-Demand | Saving |
 |---|---|---|---|
-| Compute — primary node | ~$3,150/month | ~$800–$900/month | ~$2,250/month |
-| Compute — secondary node | ~$960/month | Included in Multi-AZ | ~$960/month |
-| Storage | Included in EBS cost above | ~$270/month | Offset |
-| Automated backups | Manual — separate S3 cost | Included | Saving |
+| Compute — both nodes (Multi-AZ) | ~$4,110/month | ~$714/month | ~$3,396/month |
+| Storage — gp3, 2,680 GB | Included in EC2 EBS above | ~$370/month | Offset |
+| Automated backup storage | Manual — separate S3 cost | ~$255/month | Offset by S3 saving |
 | OS patching | Manual effort | Managed by AWS | Effort saving |
-| **Total** | **~$4,110/month** | **~$2,000–$2,500/month** | **~$1,600–$2,100/month** |
+| **Total** | **~$4,110/month** | **~$1,339–$1,389/month** | **~$2,721–$2,771/month** |
 
-> If the Nov 2025 cost change is confirmed as a legitimate resize (not a stopped instance), the saving narrows to ~$0–$500/month against the current ~$1,245/month baseline. This scenario must be investigated before presenting the cost case.
+> If the Nov 2025 cost drop on ew2p-mssql-01 is confirmed as a legitimate resize, the current EC2 baseline is ~$1,245/month and RDS is marginally more expensive on-demand (~$94–$144/month). With 1-year Reserved pricing (~$1,135/month), RDS is roughly cost-neutral with full managed service benefits. See [cost-comparison.md](./cost-comparison.md) for both scenarios.
 
 ---
 
