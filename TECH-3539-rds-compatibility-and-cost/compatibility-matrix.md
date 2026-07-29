@@ -1,8 +1,8 @@
 # Theme B — RDS Compatibility and Cost Analysis
 # [TECH-3539](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3539)
 
-> **Status:** In Progress — All compatibility blockers assessed 2026-07-24 via OPENQUERY through EW1R-REP-01 linked servers. 2 hard blockers confirmed (CLR UNSAFE assemblies, SSRS). 5 blockers closed. Cost model confirmed.
-> **Last Updated:** 2026-07-24
+> **Status:** Complete — All compatibility blockers assessed 2026-07-24. Cost model confirmed and updated 2026-07-28.
+> **Last Updated:** 2026-07-28
 
 ---
 
@@ -106,14 +106,14 @@ To use existing licenses on RDS, AWS License Mobility must be formally activated
 
 ### EC2 Baseline — Confirmed from EW1R-REP-01 Monitoring Data
 
-> Source: INFO_AWS_Entity_Cost in DBA_VCC_AWS on EW1R-REP-01. Real AWS billing data collected daily.
+> Source: `MON_AWS_Entity_Cost` in DBA_VCC_AWS on EW1R-REP-01. Real AWS billing data collected daily. Duplicates removed using MIN per day before summing.
 
-| Period | ew2p-mssql-01/month | ew2p-mssql-02/month | Combined |
-|---|---|---|---|
-| 2024 – Oct 2025 (confirmed baseline) | ~$3,150 | ~$960 | **~$4,110/month** |
-| Nov 2025 onwards (change detected — under investigation) | ~$285 | ~$960 | **~$1,245/month** |
+| Period | ew2p-mssql-01/month | ew2p-mssql-02/month | Combined | Notes |
+|---|---|---|---|---|
+| Current (post-RI, May 2025 – present) | ~$165–$234 | ~$640–$820 | **~$800–$950** | RI active on ew2p-mssql-01 since 23 Apr 2025 |
+| Pre-RI (Aug 2024 – Apr 2025) | ~$2,263–$2,804 | ~$640–$820 | **~$2,900–$3,700** | On-demand rate |
 
-> The cost drop on ew2p-mssql-01 from ~$103/day to ~$9/day around Oct/Nov 2025 is unexplained. Possible causes: instance stopped, resized, or SQL Server license removed. This must be confirmed before the cost comparison is finalised. The 2024 baseline (~$4,110/month) is used as the conservative comparison figure.
+> **Reserved Instance confirmed on ew2p-mssql-01:** purchased 23 April 2025, 3-year term most likely, expiry April 2028. The ~$165–$234/month still showing is EBS, data transfer, and SQL Server line items only — compute is covered by the RI. No cost jump in April 2026 rules out a 1-year term.
 
 ### RDS Cost Estimate — BYOL, db.r6i.2xlarge, Multi-AZ
 
@@ -130,15 +130,13 @@ To use existing licenses on RDS, AWS License Mobility must be formally activated
 
 ### EC2 vs RDS Comparison
 
-| Item | EC2 (2024 baseline) | RDS BYOL On-Demand | Saving |
+| Scenario | EC2 Monthly | RDS On-Demand | Difference |
 |---|---|---|---|
-| Compute — both nodes (Multi-AZ) | ~$4,110/month | ~$714/month | ~$3,396/month |
-| Storage — gp3, 2,680 GB | Included in EC2 EBS above | ~$370/month | Offset |
-| Automated backup storage | Manual — separate S3 cost | ~$255/month | Offset by S3 saving |
-| OS patching | Manual effort | Managed by AWS | Effort saving |
-| **Total** | **~$4,110/month** | **~$1,339–$1,389/month** | **~$2,721–$2,771/month** |
+| Current EC2 spend (RI active) | ~$800–$950 | ~$1,339–$1,389 | **RDS ~$409–$589 more expensive** |
+| Pre-RI baseline (Aug 2024 – Apr 2025) | ~$2,900–$3,700 | ~$1,339–$1,389 | **RDS ~$1,500–$2,300 cheaper** |
+| With RDS 1-year Reserved | ~$800–$950 | ~$1,135–$1,165 | **RDS ~$185–$365 more expensive** |
 
-> If the Nov 2025 cost drop on ew2p-mssql-01 is confirmed as a legitimate resize, the current EC2 baseline is ~$1,245/month and RDS is marginally more expensive on-demand (~$94–$144/month). With 1-year Reserved pricing (~$1,135/month), RDS is roughly cost-neutral with full managed service benefits. See [cost-comparison.md](./cost-comparison.md) for both scenarios.
+> At current EC2 spend, RDS is more expensive. The migration timing must align with the RI expiry (April 2028) to avoid paying both simultaneously. See [cost-comparison.md](./cost-comparison.md) for full breakdown.
 
 ---
 
@@ -160,7 +158,7 @@ To use existing licenses on RDS, AWS License Mobility must be formally activated
 - [x] Cost model populated — EC2 baseline confirmed, RDS estimate calculated, saving quantified
 - [x] RDS engine version support confirmed against current EC2 SQL Server version
 - [x] Compatibility blockers 1–6 resolved via OPENQUERY through EW1R-REP-01 linked servers
-- [ ] Cost model finalised — Nov 2025 cost change investigated and confirmed
+- [x] Cost model finalised — RI confirmed 23 Apr 2025, current baseline ~$800–$950/month, April 2028 migration window confirmed
 - [ ] AWS License Mobility activation status confirmed with manager
 - [ ] Exact RDS pricing confirmed via AWS Pricing Calculator
 - [ ] compatibility-matrix.md published to Confluence

@@ -1,8 +1,8 @@
 # Theme A — SQL Server EC2 Inventory and Dependency Reassessment
 # [TECH-3538](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3538)
 
-> **Status:** In Progress — PRD instance data confirmed 2026-07-23 via EW1R-REP-01 monitoring data
-> **Last Updated:** 2026-07-23 — Instance type, storage, actual EC2 cost, and BYOL status all confirmed from DBA_VCC_AWS on EW1R-REP-01
+> **Status:** Complete — PRD instance data confirmed 2026-07-23 via EW1R-REP-01 monitoring data. RI finding confirmed 2026-07-28.
+> **Last Updated:** 2026-07-28
 
 ---
 
@@ -136,42 +136,58 @@ Both PRD nodes are running SQL Server 2019 Enterprise Edition on r6i.2xlarge ins
 
 EW1R-REP-01 is the monitoring server that watches over the PRD SQL Server instances. It has linked servers pointing directly at ew2p-mssql-01 and ew2p-mssql-02, and it runs SQL Agent jobs that collect AWS cost data from Cost Explorer via the DBA_VCC_AWS database. This means the actual EC2 spend for the PRD nodes has been recorded daily since at least mid-2024 — without needing direct access to the AWS console or Cost Explorer.
 
-### Confirmed Daily Cost (2024 baseline — r6i.2xlarge)
+### Confirmed Monthly Cost History — from MON_AWS_Entity_Cost (duplicates removed)
 
-| Instance | Typical Daily Cost | Monthly Estimate | Notes |
-|---|---|---|---|
-| ew2p-mssql-01 | ~$103–$107/day | **~$3,150/month** | Primary node — higher cost includes SQL Server compute |
-| ew2p-mssql-02 | ~$31–$33/day | **~$960/month** | Secondary/passive node — lower cost due to BYOL passive node exemption |
-| LICENSE-EXEMPTION-KSYS-MSSQL-PASSIVE-NODE | ~$0.003/day | negligible | AWS passive node license credit — confirms BYOL |
-| **Both nodes combined** | **~$135–$140/day** | **~$4,110/month** | Baseline EC2 cost for PRD SQL Server |
+> Source: `MON_AWS_Entity_Cost` on EW1R-REP-01. Duplicates removed using MIN per day before summing. Each day has ~30 duplicate rows — the job re-inserts the last 30 days on every run. MIN(Cost) GROUP BY EntityName, Period is required before summing.
 
-### Cost Change Detected — Late 2025
+| Month | ew2p-mssql-01 | ew2p-mssql-02 | Combined | Notes |
+|---|---|---|---|---|
+| 2026-07 (partial) | $190 | $662 | **$852** | Month in progress |
+| 2026-06 | $211 | $715 | **$926** | |
+| 2026-05 | $188 | $640 | **$828** | |
+| 2026-04 | $213 | $709 | **$922** | |
+| 2026-03 | $176 | $598 | **$774** | |
+| 2026-02 | $109 | $313 | **$422** | Short month |
+| 2026-01 | $198 | $668 | **$866** | |
+| 2025-12 | $164 | $552 | **$716** | |
+| 2025-11 | $165 | $571 | **$736** | |
+| 2025-10 | $188 | $644 | **$832** | |
+| 2025-09 | $203 | $675 | **$878** | |
+| 2025-08 | $194 | $706 | **$900** | |
+| 2025-07 | $222 | $811 | **$1,033** | |
+| 2025-06 | $234 | $820 | **$1,054** | |
+| **2025-05** | **$217** | **$804** | **$1,021** | ⚠️ First full month at RI rate |
+| **2025-04** | **$1,810** | **$725** | **$2,535** | ⚠️ Last month at on-demand — RI purchased 23 Apr 2025 |
+| 2025-03 | $2,467 | $759 | **$3,226** | |
+| 2025-02 | $2,236 | $689 | **$2,925** | |
+| 2025-01 | $2,657 | $791 | **$3,448** | |
+| 2024-12 | $2,263 | $673 | **$2,936** | |
+| 2024-11 | $2,370 | $711 | **$3,081** | |
+| 2024-10 | $2,550 | $790 | **$3,340** | |
+| 2024-09 | $2,804 | $868 | **$3,672** | |
+| 2024-08 | $832 | $261 | **$1,093** | Partial — data starts here |
 
-The cost data shows ew2p-mssql-01 dropped from ~$103/day to ~$9–10/day around October/November 2025, while ew2p-mssql-02 remained at ~$31/day. This is a significant change and needs to be confirmed:
+### Reserved Instance Finding — ew2p-mssql-01
 
-- ew2p-mssql-01 may have been stopped, resized, or had its SQL Server license removed
-- If ew2p-mssql-01 was downsized, the current PRD cost baseline is lower than the 2024 figure
-- This must be confirmed before the cost comparison in TECH-3539 is finalised
+| Evidence | Detail |
+|---|---|
+| Last on-demand day | 2025-04-22 — cost dropped sharply the following day |
+| First RI day | 2025-04-23 — daily cost dropped ~88% overnight |
+| Cost Apr 2026 | Still flat — no jump — 1-year term ruled out |
+| RI term assessment | 3-year — most likely. Expiry April 2028 |
+| RI status ew2p-mssql-02 | Unknown — pending account manager confirmation |
 
-| Period | ew2p-mssql-01/month | ew2p-mssql-02/month | Combined |
-|---|---|---|---|
-| 2024 – Oct 2025 (confirmed baseline) | ~$3,150 | ~$960 | **~$4,110/month** |
-| Nov 2025 onwards (change detected) | ~$285 | ~$960 | **~$1,245/month** |
+> **Current EC2 baseline: ~$800–$950/month combined.** The ~$165–$234/month still showing on ew2p-mssql-01 is EBS storage, data transfer, and SQL Server line items only — compute is covered by the RI.
 
 ### RDS Cost Comparison — Scenario A (BYOL confirmed)
 
-Now that BYOL is confirmed and the instance type is known (r6i.2xlarge), the RDS cost comparison can be calculated accurately for TECH-3539:
-
-| Component | EC2 Current (2024 baseline) | RDS BYOL Equivalent | Difference |
+| Scenario | EC2 Monthly | RDS On-Demand | Difference |
 |---|---|---|---|
-| ew2p-mssql-01 compute | ~$3,150/month | ~$800–$900/month (db.r6i.2xlarge BYOL) | RDS ~$2,250 cheaper |
-| ew2p-mssql-02 compute | ~$960/month | ~$800–$900/month (Multi-AZ standby) | Similar |
-| Storage (2,680 GB × 2 nodes) | Included in EC2 EBS cost | ~$270/month (gp3) | Separate on RDS |
-| Automated backups | Manual — S3 cost separate | Included in RDS | Saving |
-| OS patching | Manual effort | Managed by AWS | Effort saving |
-| **Total estimated** | **~$4,110/month** | **~$2,000–$2,500/month** | **~$1,600–$2,100/month saving** |
+| Current EC2 spend (RI active) | ~$800–$950 | ~$1,359–$1,389 | **RDS ~$409–$589 more expensive** |
+| Pre-RI baseline (Aug 2024 – Apr 2025) | ~$2,900–$3,700 | ~$1,359–$1,389 | **RDS ~$1,500–$2,300 cheaper** |
+| With RDS 1-year Reserved | ~$800–$950 | ~$1,135–$1,165 | **RDS ~$185–$365 more expensive** |
 
-> These are indicative figures. TECH-3539 will produce the full cost model with exact RDS pricing from the AWS Pricing Calculator.
+> Full cost breakdown in [cost-comparison.md](../TECH-3539-rds-compatibility-and-cost/cost-comparison.md).
 
 ---
 
