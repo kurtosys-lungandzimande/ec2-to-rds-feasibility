@@ -1,0 +1,259 @@
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- ============================================================ -->
+    <!-- TITLE -->
+    <!-- ============================================================ -->
+    <mxCell id="100" value="EC2 to RDS Migration — Current State vs Future State" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="300" y="20" width="1054" height="40" as="geometry" />
+    </mxCell>
+
+    <!-- ============================================================ -->
+    <!-- CURRENT STATE CONTAINER -->
+    <!-- ============================================================ -->
+    <mxCell id="200" value="CURRENT STATE — Self-Managed EC2 (eu-west-2)" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="40" y="80" width="740" height="1000" as="geometry" />
+    </mxCell>
+
+    <!-- VPC -->
+    <mxCell id="201" value="VPC — eu-west-2 (London)" style="swimlane;startSize=25;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=11;fontStyle=2;" vertex="1" parent="200">
+      <mxGeometry x="20" y="50" width="700" height="880" as="geometry" />
+    </mxCell>
+
+    <!-- Always On AG label -->
+    <mxCell id="202" value="Always On Availability Group" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontStyle=1;fontSize=11;" vertex="1" parent="201">
+      <mxGeometry x="150" y="20" width="400" height="25" as="geometry" />
+    </mxCell>
+
+    <!-- ew2p-mssql-01 PRIMARY -->
+    <mxCell id="210" value="&lt;b&gt;ew2p-mssql-01&lt;/b&gt;&lt;br&gt;PRIMARY&lt;br&gt;r6i.2xlarge | 8 vCPU | 64 GB RAM&lt;br&gt;SQL Server 2019 Enterprise (BYOL)&lt;br&gt;Reserved Instance — Apr 2025–Apr 2028" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="201">
+      <mxGeometry x="30" y="60" width="280" height="90" as="geometry" />
+    </mxCell>
+
+    <!-- ew2p-mssql-02 SECONDARY -->
+    <mxCell id="211" value="&lt;b&gt;ew2p-mssql-02&lt;/b&gt;&lt;br&gt;SECONDARY&lt;br&gt;r6i.2xlarge | 8 vCPU | 64 GB RAM&lt;br&gt;SQL Server 2019 Enterprise (BYOL)&lt;br&gt;RI status — TBC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="201">
+      <mxGeometry x="390" y="60" width="280" height="90" as="geometry" />
+    </mxCell>
+
+    <!-- AG sync arrow -->
+    <mxCell id="212" value="Synchronous Replication" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#d6b656;fontStyle=2;fontSize=9;" edge="1" source="210" target="211" parent="201">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- EBS Volumes - Primary -->
+    <mxCell id="220" value="EBS Volumes (Primary)&lt;br&gt;80 GB OS ⚠️ Unencrypted&lt;br&gt;1,400 GB Data ✅ Encrypted&lt;br&gt;800 GB Data ✅ Encrypted&lt;br&gt;400 GB Log/TempDB ✅ Encrypted" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="201">
+      <mxGeometry x="30" y="175" width="200" height="85" as="geometry" />
+    </mxCell>
+
+    <!-- EBS Volumes - Secondary -->
+    <mxCell id="221" value="EBS Volumes (Secondary)&lt;br&gt;80 GB OS ⚠️ Unencrypted&lt;br&gt;1,400 GB Data ✅ Encrypted&lt;br&gt;800 GB Data ✅ Encrypted&lt;br&gt;400 GB Log/TempDB ✅ Encrypted" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="201">
+      <mxGeometry x="470" y="175" width="200" height="85" as="geometry" />
+    </mxCell>
+
+    <!-- EBS arrow primary -->
+    <mxCell id="222" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="210" target="220" parent="201">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- EBS arrow secondary -->
+    <mxCell id="223" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="211" target="221" parent="201">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- SSRS on same instance -->
+    <mxCell id="230" value="&lt;b&gt;SSRS&lt;/b&gt;&lt;br&gt;SQL Server Reporting Services&lt;br&gt;Running on ew2p-mssql-01&lt;br&gt;⚠️ Must move before migration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="201">
+      <mxGeometry x="30" y="290" width="200" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- SQL Agent Jobs -->
+    <mxCell id="231" value="&lt;b&gt;SQL Agent Jobs&lt;/b&gt;&lt;br&gt;Backup (CmdExec) ⚠️&lt;br&gt;CHECKDB (CmdExec) ⚠️&lt;br&gt;Index Rebuild (CmdExec) ⚠️&lt;br&gt;All retired on RDS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="201">
+      <mxGeometry x="250" y="290" width="200" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- Database Mail -->
+    <mxCell id="232" value="&lt;b&gt;Database Mail&lt;/b&gt;&lt;br&gt;Profile: dba&lt;br&gt;dba@kurtosys.com → SMTP&lt;br&gt;⚠️ Not supported on RDS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="201">
+      <mxGeometry x="470" y="290" width="200" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- CLR Assemblies -->
+    <mxCell id="233" value="&lt;b&gt;CLR Assemblies — UNSAFE&lt;/b&gt;&lt;br&gt;SECURITYBENEFIT: 25 assemblies&lt;br&gt;RWC: 25 assemblies&lt;br&gt;EmailReportNotifications&lt;br&gt;SHA1StringFunction&lt;br&gt;⚠️ Hard blocker for RDS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="201">
+      <mxGeometry x="30" y="390" width="200" height="90" as="geometry" />
+    </mxCell>
+
+    <!-- Linked Server -->
+    <mxCell id="234" value="&lt;b&gt;Linked Server&lt;/b&gt;&lt;br&gt;UDM_MEM → MemSQL&lt;br&gt;❌ Dead — decommissioned May 2026&lt;br&gt;Drop before migration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="201">
+      <mxGeometry x="250" y="390" width="200" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- 20 Databases -->
+    <mxCell id="235" value="&lt;b&gt;20 Databases — 803 GB&lt;/b&gt;&lt;br&gt;18 clean ✅ — ready to migrate&lt;br&gt;2 blocked ⚠️ — SECURITYBENEFIT, RWC&lt;br&gt;All FULL recovery model&lt;br&gt;Latin1_General_CI_AS collation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="201">
+      <mxGeometry x="470" y="390" width="200" height="80" as="geometry" />
+    </mxCell>
+
+    <!-- Windows Logins -->
+    <mxCell id="236" value="&lt;b&gt;Logins&lt;/b&gt;&lt;br&gt;51 SQL logins ✅ (all app accounts)&lt;br&gt;10 Windows logins ⚠️&lt;br&gt;(DBA access — replace with SQL)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="201">
+      <mxGeometry x="250" y="490" width="200" height="65" as="geometry" />
+    </mxCell>
+
+    <!-- S3 Backups current -->
+    <mxCell id="240" value="&lt;b&gt;S3 Backup Buckets&lt;/b&gt;&lt;br&gt;Ola Hallengren + S3 upload&lt;br&gt;⚠️ No encryption on upload" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="201">
+      <mxGeometry x="250" y="580" width="200" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- EW1R-REP-01 Monitoring -->
+    <mxCell id="250" value="&lt;b&gt;EW1R-REP-01&lt;/b&gt;&lt;br&gt;Monitoring &amp; Reporting Server&lt;br&gt;Collects AWS cost data daily&lt;br&gt;DBA_VCC_AWS.MON_AWS_Entity_Cost&lt;br&gt;74 Grafana dashboards" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="201">
+      <mxGeometry x="30" y="580" width="200" height="80" as="geometry" />
+    </mxCell>
+
+    <!-- Monitoring arrow -->
+    <mxCell id="251" value="monitors" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;strokeColor=#9673a6;fontSize=9;fontStyle=2;" edge="1" source="250" target="210" parent="201">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Cost label -->
+    <mxCell id="260" value="💰 Current Cost: ~$800–$950/month combined&lt;br&gt;ew2p-mssql-01: ~$165–$234/month (RI active — EBS + data transfer only)&lt;br&gt;ew2p-mssql-02: ~$640–$820/month" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;fontStyle=1;" vertex="1" parent="201">
+      <mxGeometry x="30" y="690" width="640" height="55" as="geometry" />
+    </mxCell>
+
+    <!-- RI label -->
+    <mxCell id="261" value="⚠️ Reserved Instance on ew2p-mssql-01 — purchased 23 Apr 2025, 3-year term, expiry Apr 2028&lt;br&gt;Migrating before Apr 2028 = paying RI + RDS simultaneously" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;fontStyle=1;" vertex="1" parent="201">
+      <mxGeometry x="30" y="760" width="640" height="45" as="geometry" />
+    </mxCell>
+
+    <!-- ============================================================ -->
+    <!-- FUTURE STATE CONTAINER -->
+    <!-- ============================================================ -->
+    <mxCell id="300" value="FUTURE STATE — Amazon RDS Managed (eu-west-2) — Target: April 2028" style="swimlane;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="860" y="80" width="740" height="1000" as="geometry" />
+    </mxCell>
+
+    <!-- VPC future -->
+    <mxCell id="301" value="VPC — eu-west-2 (London)" style="swimlane;startSize=25;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=11;fontStyle=2;" vertex="1" parent="300">
+      <mxGeometry x="20" y="50" width="700" height="880" as="geometry" />
+    </mxCell>
+
+    <!-- RDS Multi-AZ -->
+    <mxCell id="310" value="&lt;b&gt;Amazon RDS — Multi-AZ&lt;/b&gt;&lt;br&gt;db.r6i.2xlarge | 8 vCPU | 64 GB RAM&lt;br&gt;SQL Server 2019 Enterprise (BYOL)&lt;br&gt;Managed by AWS — no OS access needed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="301">
+      <mxGeometry x="170" y="60" width="360" height="80" as="geometry" />
+    </mxCell>
+
+    <!-- Primary AZ -->
+    <mxCell id="311" value="&lt;b&gt;Primary Instance&lt;/b&gt;&lt;br&gt;Availability Zone A&lt;br&gt;Active — serves all reads/writes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="301">
+      <mxGeometry x="60" y="175" width="240" height="65" as="geometry" />
+    </mxCell>
+
+    <!-- Standby AZ -->
+    <mxCell id="312" value="&lt;b&gt;Standby Instance&lt;/b&gt;&lt;br&gt;Availability Zone B&lt;br&gt;Passive — auto-failover only" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="301">
+      <mxGeometry x="400" y="175" width="240" height="65" as="geometry" />
+    </mxCell>
+
+    <!-- Multi-AZ sync arrow -->
+    <mxCell id="313" value="Synchronous Replication&lt;br&gt;(Managed by AWS)" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#82b366;fontStyle=2;fontSize=9;" edge="1" source="311" target="312" parent="301">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- RDS to primary arrow -->
+    <mxCell id="314" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.3;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="310" target="311" parent="301">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- RDS to standby arrow -->
+    <mxCell id="315" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.7;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="310" target="312" parent="301">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- RDS Storage -->
+    <mxCell id="320" value="&lt;b&gt;RDS Storage — gp3&lt;/b&gt;&lt;br&gt;2,680 GB allocated&lt;br&gt;✅ Encrypted at rest (AWS KMS)&lt;br&gt;✅ Managed by AWS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="301">
+      <mxGeometry x="60" y="270" width="200" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- 18 Databases -->
+    <mxCell id="321" value="&lt;b&gt;18 Databases — migrated ✅&lt;/b&gt;&lt;br&gt;Native backup/restore from EC2&lt;br&gt;Latin1_General_CI_AS collation&lt;br&gt;All FULL recovery model" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="301">
+      <mxGeometry x="400" y="270" width="200" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- SECURITYBENEFIT RWC decision -->
+    <mxCell id="322" value="&lt;b&gt;SECURITYBENEFIT + RWC&lt;/b&gt;&lt;br&gt;⚠️ Decision required&lt;br&gt;Option A: Rewrite CLR → migrate&lt;br&gt;Option B: Stay on EC2 permanently" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="301">
+      <mxGeometry x="230" y="270" width="160" height="75" as="geometry" />
+    </mxCell>
+
+    <!-- SSRS separate EC2 -->
+    <mxCell id="330" value="&lt;b&gt;SSRS — Separate EC2&lt;/b&gt;&lt;br&gt;Moved off RDS instance&lt;br&gt;Own EC2 or migrate to Power BI&lt;br&gt;✅ No longer on DB server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="301">
+      <mxGeometry x="60" y="370" width="200" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- Amazon SES -->
+    <mxCell id="331" value="&lt;b&gt;Amazon SES / SNS&lt;/b&gt;&lt;br&gt;Replaces Database Mail&lt;br&gt;SQL Agent alerts → SES&lt;br&gt;✅ Fully managed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="301">
+      <mxGeometry x="280" y="370" width="200" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- SQL Logins -->
+    <mxCell id="332" value="&lt;b&gt;Logins&lt;/b&gt;&lt;br&gt;51 SQL logins ✅ — unchanged&lt;br&gt;Windows DBA logins replaced&lt;br&gt;with SQL logins on RDS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="301">
+      <mxGeometry x="490" y="370" width="180" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- Managed backups -->
+    <mxCell id="340" value="&lt;b&gt;Automated Backups → S3&lt;/b&gt;&lt;br&gt;✅ Managed by AWS&lt;br&gt;✅ Encrypted&lt;br&gt;7-day retention (configurable)&lt;br&gt;No manual jobs needed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="301">
+      <mxGeometry x="60" y="465" width="200" height="80" as="geometry" />
+    </mxCell>
+
+    <!-- Managed maintenance -->
+    <mxCell id="341" value="&lt;b&gt;Managed Maintenance&lt;/b&gt;&lt;br&gt;✅ CHECKDB — AWS managed&lt;br&gt;✅ Index rebuild — AWS managed&lt;br&gt;✅ OS patching — AWS managed&lt;br&gt;✅ No SQL Agent CmdExec jobs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="301">
+      <mxGeometry x="280" y="465" width="200" height="80" as="geometry" />
+    </mxCell>
+
+    <!-- EW1R-REP-01 future -->
+    <mxCell id="350" value="&lt;b&gt;EW1R-REP-01&lt;/b&gt;&lt;br&gt;Monitoring continues&lt;br&gt;(separate decommission epic)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="301">
+      <mxGeometry x="490" y="465" width="180" height="65" as="geometry" />
+    </mxCell>
+
+    <!-- Monitoring arrow future -->
+    <mxCell id="351" value="monitors" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;strokeColor=#9673a6;fontSize=9;fontStyle=2;" edge="1" source="350" target="310" parent="301">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- Cost future -->
+    <mxCell id="360" value="💰 Future Cost: ~$1,359–$1,389/month on-demand | ~$985–$1,015/month with 3-year RI&lt;br&gt;~$409–$589/month more than current EC2 spend at on-demand rate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;" vertex="1" parent="301">
+      <mxGeometry x="30" y="570" width="640" height="45" as="geometry" />
+    </mxCell>
+
+    <!-- Operational benefits -->
+    <mxCell id="361" value="✅ No OS patching   ✅ Automated backups   ✅ Multi-AZ failover managed   ✅ Storage encryption enforced&lt;br&gt;✅ No CHECKDB jobs   ✅ No index rebuild jobs   ✅ CloudWatch monitoring included" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;fontStyle=1;" vertex="1" parent="301">
+      <mxGeometry x="30" y="630" width="640" height="45" as="geometry" />
+    </mxCell>
+
+    <!-- Migration window -->
+    <mxCell id="362" value="🗓️ Target migration window: April 2028 (RI expiry) — technical prep starts now&lt;br&gt;Early migration = paying RI + RDS simultaneously until April 2028" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;fontStyle=1;" vertex="1" parent="301">
+      <mxGeometry x="30" y="690" width="640" height="45" as="geometry" />
+    </mxCell>
+
+    <!-- ============================================================ -->
+    <!-- MIGRATION ARROW between the two states -->
+    <!-- ============================================================ -->
+    <mxCell id="400" value="&lt;b&gt;Migration&lt;/b&gt;&lt;br&gt;Native backup/restore&lt;br&gt;Target: April 2028" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#FF0000;strokeWidth=3;fontStyle=1;fontSize=11;fillColor=#f8cecc;" edge="1" source="200" target="300" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ============================================================ -->
+    <!-- LEGEND -->
+    <!-- ============================================================ -->
+    <mxCell id="500" value="Legend" style="swimlane;startSize=25;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="40" y="1100" width="700" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="501" value="✅ Supported / Clean" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="500">
+      <mxGeometry x="10" y="20" width="130" height="22" as="geometry" />
+    </mxCell>
+    <mxCell id="502" value="⚠️ Blocker / Needs action" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="500">
+      <mxGeometry x="150" y="20" width="150" height="22" as="geometry" />
+    </mxCell>
+    <mxCell id="503" value="⚠️ Decision pending" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="500">
+      <mxGeometry x="310" y="20" width="130" height="22" as="geometry" />
+    </mxCell>
+    <mxCell id="504" value="Monitoring / Supporting" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="500">
+      <mxGeometry x="450" y="20" width="150" height="22" as="geometry" />
+    </mxCell>
+
+  </root>
+</mxGraphModel>
