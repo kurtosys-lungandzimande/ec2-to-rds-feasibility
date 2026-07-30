@@ -1,16 +1,18 @@
 # Go / No-Go Recommendation
 # [TECH-3540](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3540)
 
-> **Status:** In Progress — all findings confirmed 2026-07-24 from live PRD queries via EW1R-REP-01
-> **Last Updated:** 2026-07-24
+> **Status:** Investigation Complete — Recommendation: NO-GO. Stay on EC2.
+> **Last Updated:** 2026-07-28 — Cost case closed. Hermann Lotter confirmed no 3-year RI, not BYOL, passive node licence-free on EC2. RDS ~$37,600/year more expensive.
 
 ---
 
-## Recommendation — GO with Conditions
+## Recommendation — NO-GO. Stay on EC2.
 
-**Migration from EC2 to RDS is viable. The recommendation is GO.**
+**Migration from EC2 to RDS is not recommended. The cost case does not support it.**
 
-Not everything can move at once — 18 out of 20 databases are clean and ready. 2 databases have a hard blocker that needs a decision before they can move. Everything else is solvable with preparation work.
+Hermann Lotter confirmed on 2026-07-29 (TECH-3431) that the original cost assumptions were incorrect. RDS costs ~$37,600/year more than the current EC2 setup. This is a deliberate trade — paying for managed patching, backups, and HA — not a saving. The epic as written expected cost-neutral or better. That premise does not hold.
+
+The technical investigation found 18 of 20 databases are clean and migration-ready, and 2 have hard CLR blockers. But the cost case closes the question before technical readiness matters.
 
 ---
 
@@ -78,29 +80,42 @@ RDS does not support Database Mail. Before migration, this needs to be replaced 
 
 ---
 
-### The cost case
+### The cost case — corrected 2026-07-28
 
-The current EC2 spend is approximately **$800–$950/month** combined for both nodes — confirmed from real AWS billing data on EW1R-REP-01. This is the post-RI figure. Before the Reserved Instance was purchased on 23 April 2025, the combined spend was ~$2,900–$3,700/month.
+**Source:** Hermann Lotter, TECH-3431 comment, 2026-07-29. Figures measured, not estimated.
 
-On RDS with BYOL (we own the licenses — confirmed), the equivalent Multi-AZ configuration would cost approximately **$1,359–$1,389/month** on-demand — around **$409–$589/month more expensive** than current EC2 spend. With a 1-year RDS Reserved Instance, the RDS cost drops to ~$1,135–$1,165/month, which is still ~$185–$365/month more than current EC2 spend.
+> ⚠️ The original cost figures in this document were based on incorrect assumptions. All figures below are the corrected, confirmed numbers.
 
-**The migration timing is constrained by the RI.** A Reserved Instance is almost certainly in place on ew2p-mssql-01 — purchased 23 April 2025, most likely a 3-year term expiring April 2028. Migrating before that date means paying for both the unused RI and RDS compute simultaneously. The financially optimal migration window is **at or after April 2028**. Technical preparation work (resolving CLR blockers, moving SSRS, replacing Database Mail) should happen before that date so the cutover can happen cleanly when the RI expires.
+**Measured EC2 cost — March 2026 (744-hour month, after commitment discounts):**
 
-**If the business wants to migrate before April 2028 — the trade-off:**
-
-The RI is a pre-paid commitment. That money is gone regardless of whether the EC2 instance keeps running or not — Reserved Instances are non-refundable and non-cancellable. Migrating early means Kurtosys pays for both simultaneously until April 2028.
-
-The only ways to recover value from the RI early are:
-
-| Option | Trade-off |
+| Item | Monthly |
 |---|---|
-| Wait until April 2028 | Cleanest — no double-paying, no extra complexity. Technical prep happens now, cutover happens at expiry |
-| Repurpose the EC2 for another workload | RI gets used — but now managing EC2 AND RDS simultaneously. OS patching burden stays. Operational complexity increases. Need a genuine workload that justifies r6i.2xlarge (8 vCPU, 64 GB RAM, SQL Server Enterprise). If no real workload exists, this is just running a large idle box to avoid a sunk cost |
-| Sell the RI on AWS Marketplace | Partial recovery possible — but SQL Server RIs are harder to sell than Linux, and recovery will be less than the remaining term value |
+| ew2p-mssql-01 — compute and SQL licence | $2,753.92 |
+| ew2p-mssql-02 — compute only (passive node, no SQL licence) | $512.95 |
+| EBS — 5,360 GiB gp3 + provisioned throughput | $532.21 |
+| **Total** | **$3,799.08 (~$45,600/year)** |
 
-> **Recommendation:** Do not repurpose the EC2 unless there is a genuine workload already waiting for it. Creating operational overhead to justify a sunk cost is a false saving. The right answer is to start technical preparation now and target April 2028 for cutover.
+**RDS comparison — list pricing (db.r6i.2xlarge SQL Server Enterprise LI Multi-AZ, eu-west-2):**
 
-**Why we own the licenses (BYOL):** BYOL stands for Bring Your Own License. It means Kurtosys purchased SQL Server Enterprise licenses directly from Microsoft. When you run on EC2 or RDS with BYOL, you only pay AWS for the compute and storage — the license cost does not appear on the AWS bill because you already paid Microsoft for it. We confirmed this from the AWS cost data — a line item called `LICENSE-EXEMPTION-KSYS-MSSQL-PASSIVE-NODE` appears on the secondary node. AWS only applies this exemption when a customer is running BYOL with active Software Assurance. This is the proof.
+| Option | Compute & Licence | Storage | Annual |
+|---|---|---|---|
+| EC2 today (after commitments) | $38,413 | $6,387 | ~$45,600 |
+| RDS SQL Ent LI Multi-AZ (list) | $66,094 | $17,109 | ~$83,200 |
+
+**RDS is ~$37,600/year more expensive.** Storage is the larger swing — same 5,360 GiB moves from $532/month on EBS to $1,426/month on RDS.
+
+**What the original assumptions got wrong:**
+
+| Original Assumption | Reality |
+|---|---|
+| 3-year RI purchased Apr 2025, expiry Apr 2028 | No 3-year RI. 1-year convertible ended 2025-12-02. Current coverage ends 2026-09-08 |
+| Instances are BYOL | Not BYOL — AWS License Included. No Microsoft licence commitment to unwind |
+| Passive node carries a SQL Server licence charge | Passive node (ew2p-mssql-02) bills at plain Windows rate ($0.96/hr) — worth ~$26,000/year saving. RDS does not offer this |
+| Current EC2 cost ~$800–$950/month | Actual: $3,799.08/month — the RI was short-term and has rolled off |
+
+**Commitment timing note:** Compute Savings Plans cover EC2 but not RDS. Current plans end 2026-10-18, 2026-11-06, and 2027-06-14. Any future migration would need to align with these dates to avoid wasting committed spend.
+
+**Open dependency:** AWS EC2 HA for SQL Server — Kurtosys was onboarded onto an AWS programme in 2022. AWS launched a public equivalent on 2025-11-17. Whether Kurtosys is still on the 2022 programme or has moved to the GA feature needs confirming with the AWS account team. Hermann is picking this up. Do not assume either way.
 
 ---
 
@@ -117,24 +132,23 @@ The only ways to recover value from the RI early are:
 
 ## What Needs Sign-Off at the Manager Meeting
 
-| Question | Why It Matters |
+| Question | Status |
 |---|---|
-| Has AWS License Mobility been formally activated for RDS? | Administrative step — not a blocker, but must be initiated before migration begins |
-| Confirm RI term and expiry for ew2p-mssql-01 — believed to be 3-year purchased 23 Apr 2025, expiring Apr 2028 | Determines the earliest cost-neutral migration window |
-| Confirm whether ew2p-mssql-02 is also on a Reserved Instance | Could affect combined cost baseline and migration timing |
-| Who owns SECURITYBENEFIT and RWC — rewrite CLR or leave on EC2? | Determines whether Phase 3 is a rewrite project or a permanent split |
-| Who owns SSRS — move to EC2 or migrate to Power BI? | Determines Phase 1 effort and timeline |
+| Confirm RI term and expiry for ew2p-mssql-01 | Closed — no 3-year RI. Hermann confirmed 2026-07-29 |
+| Confirm RI status for ew2p-mssql-02 | Closed — Compute Savings Plan, not RI. Hermann confirmed 2026-07-29 |
+| Confirm BYOL license commitment | Closed — not BYOL, AWS License Included. Hermann confirmed 2026-07-29 |
+| Manager sign-off on NO-GO recommendation | Open — pending Jacobus sign-off |
+| AWS EC2 HA programme — 2022 vs GA feature | Open — Hermann picking up with AWS account team |
 
 ---
 
 ## Definition of Done
 
 - [x] Go/no-go recommendation written with evidence from TECH-3538 and TECH-3539
-- [x] Phased migration plan documented
-- [x] Plain English summary written for briefing
-- [ ] Migration approaches documented with downtime estimates — see migration-approaches.md
-- [ ] Risk register completed — see risk-register.md
-- [ ] Manager sign-off obtained
+- [x] Cost case closed — Hermann confirmed figures 2026-07-29
+- [x] Recommendation updated to NO-GO — stay on EC2
+- [x] All cost assumptions corrected
+- [ ] Manager sign-off obtained — pending Jacobus
 - [ ] Epic TECH-3431 closure comment written
 
 ---

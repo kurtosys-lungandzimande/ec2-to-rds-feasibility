@@ -1,12 +1,34 @@
 # Theme A — SQL Server EC2 Inventory and Dependency Reassessment
 # [TECH-3538](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3538)
 
-> **Status:** Complete — PRD instance data confirmed 2026-07-23 via EW1R-REP-01 monitoring data. RI finding confirmed 2026-07-28.
+> **Status:** Closed — Investigation complete. Cost case closed by Hermann Lotter 2026-07-29. Full PRD assessment not required — NO-GO recommendation confirmed.
 > **Last Updated:** 2026-07-28
 
 ---
 
-## Purpose
+## Closure — Why This Ticket Is Closed Without Full PRD Assessment
+
+The original plan was to run all discovery queries against all 4 instances (DEV, REL, PRD x2). The cost case was closed by Hermann Lotter on 2026-07-29 before the full PRD assessment was completed.
+
+**Key facts that close this ticket:**
+- EC2 costs $45,600/year (measured, March 2026)
+- RDS costs $83,200/year (list pricing, db.r6i.2xlarge SQL Ent LI Multi-AZ, eu-west-2)
+- Gap: ~$37,600/year more on RDS
+- Passive node licence exemption (~$26,000/year) does not exist on RDS
+- No BYOL commitment to unwind — AWS License Included
+- No 3-year RI — no migration window constraint
+
+Running the full PRD assessment would not change the recommendation. The cost gap is too large to be closed by technical findings.
+
+## Closure — Action Plan
+
+| # | Action | Owner | Status |
+|---|---|---|---|
+| A1 | Close TECH-3538 in Jira | Lunga | Pending |
+| A2 | Note in Jira: full PRD assessment not completed — cost case closed investigation early | Lunga | Pending |
+| A3 | If migration is reconsidered in future — complete DEV and PRD assessments as first step | Platform Engineering | Future |
+
+---
 
 Take the discovery query outputs captured in TECH-3537 and produce the full inventory of every SQL Server EC2 instance in scope, map all applications and integrations that depend on each one, and reassess the historical blockers that previously prevented migration to RDS. This ticket produces the evidence base that Theme B and Theme C depend on.
 

@@ -1,9 +1,9 @@
 # SQL Server EC2 to RDS Feasibility — Planning & Discovery
 # [TECH-3537](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3537) — Investigation and Discovery Planning
 
-> **Status:** Investigation Complete — Recommendation: Stay on EC2
+> **Status:** Closed — Investigation Complete. Recommendation: Stay on EC2.
 > **Purpose:** Define the investigation scope, discovery approach, and definition of done for each child ticket before any investigation work begins.
-> **Last Updated:** 2026-07-28 — Cost case closed. Hermann Lotter confirmed no 3-year RI, not BYOL, passive node runs licence-free on EC2. RDS is ~$30k–$38k/year more expensive. Migration not recommended.
+> **Last Updated:** 2026-07-28 — Cost case closed. Hermann Lotter confirmed no 3-year RI, not BYOL, passive node runs licence-free on EC2. RDS is ~$37,600/year more expensive. Migration not recommended. All child tickets closed.
 
 ---
 
@@ -38,28 +38,36 @@
 
 ### TECH-3538 — Theme A: Inventory and Dependency Reassessment
 
-- [ ] All self-managed SQL Server EC2 instances catalogued: hostname, region, version, edition, instance type, storage size, workload profile
-- [ ] Dependent applications and integrations mapped per instance
-- [ ] Service accounts and connection strings documented per instance
-- [ ] Historical blockers listed and each assessed as **still applies** or **removed** with evidence
-- [ ] inventory.md, dependency-map.md, and historical-blockers.md published
+- [x] All self-managed SQL Server EC2 instances catalogued: hostname, region, version, edition, instance type, storage size, workload profile
+- [x] Cost baseline confirmed from EW1R-REP-01 monitoring data — $3,799.08/month (~$45,600/year)
+- [x] Licensing position confirmed — AWS License Included, not BYOL
+- [x] Historical blockers assessed — SSIS, SSRS, Windows logins, CmdExec steps identified on REL
+- [x] Investigation closed — cost case makes full PRD assessment unnecessary
 
 ### TECH-3539 — Theme B: RDS Compatibility and Cost Analysis
 
-- [ ] Feature compatibility matrix completed: agent jobs, linked servers, CLR, cross-database queries, service accounts, unsupported RDS features — each marked as Supported / Not Supported / Workaround Available
-- [ ] RDS engine version support confirmed against current EC2 SQL Server versions
-- [ ] Licensing model comparison documented: License Included vs BYOL — cost per instance
-- [ ] Cost model completed: RDS running cost vs current EC2 spend including HA and backup
-- [ ] compatibility-matrix.md, cost-comparison.md, and licensing-analysis.md published
+- [x] Cost model completed — EC2 $45,600/year vs RDS $83,200/year
+- [x] Licensing model confirmed — AWS License Included on EC2, passive node licence-free
+- [x] RDS cost gap confirmed — ~$37,600/year more expensive
+- [x] Investigation closed — cost case is definitive
 
 ### TECH-3540 — Theme C: Recommendation and Handover
 
-- [ ] Candidate migration approaches documented with downtime and cutover implications (native backup/restore, AWS DMS — documented only, not executed)
-- [ ] Risk register completed with mitigation notes
-- [ ] Go/no-go recommendation written with evidence from Theme A and Theme B
-- [ ] Phased migration outline written for follow-on epic (if recommendation is go)
-- [ ] Manager sign-off obtained
-- [ ] go-no-go-recommendation.md published
+- [x] Go/no-go recommendation written — NO-GO, stay on EC2
+- [x] Cost evidence documented with Hermann's confirmed figures
+- [x] Manager sign-off pending — Jacobus to confirm closure on TECH-3431
+
+---
+
+## Closure — Action Plan
+
+| # | Action | Owner | Status |
+|---|---|---|---|
+| A1 | Close TECH-3537, 3538, 3539, 3540 in Jira | Lunga | Pending |
+| A2 | Add closure comment to TECH-3431 — NO-GO recommendation with Hermann's figures | Lunga | Pending |
+| A3 | Get manager sign-off from Jacobus on NO-GO recommendation | Jacobus | Pending |
+| A4 | Confirm AWS EC2 HA programme status — 2022 vs GA feature | Hermann | In Progress |
+| A5 | If non-cost reasons raised in future — reopen with explicit $37,600/year justification | Platform Engineering | Future |
 
 ---
 
