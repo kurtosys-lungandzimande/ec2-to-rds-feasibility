@@ -231,19 +231,73 @@ A straight lift-and-shift of SQL Server from EC2 to RDS is not possible in its c
 
 ### Cost Conclusion — 2026-07-28
 
-**Source:** Hermann Lotter, confirmed on TECH-3431 comment 2026-07-28
+**Source:** Hermann Lotter, TECH-3431 comment, 2026-07-29. Figures measured, not estimated. Cross-checked against Cost Explorer to within 1%.
 
-The original cost assumptions underpinning this investigation were incorrect:
+> ⚠️ Do not use the datalake CUR table for cost baselines on this epic — use Cost Explorer and deduplicated CUR line items only.
+
+#### Reserved Instance and Savings Plan Position
 
 | Assumption | Reality |
 |---|---|
-| 3-year RI purchased Apr 2025, expiry Apr 2028 | No 3-year RI exists — assumption was wrong |
-| Instances are BYOL | Instances are not BYOL |
-| Passive node carries a licence cost | Passive node (ew2p-mssql-02) runs without a SQL Server licence charge on EC2 |
+| 3-year RI purchased Apr 2025, expiry Apr 2028 | No 3-year RI. The RI from 2025-04-22 was a 1-year convertible — ended early 2025-12-02 |
+| ew2p-mssql-01 on RI | Current coverage: two Region-scoped convertible No Upfront RIs, end date 2026-09-08 |
+| ew2p-mssql-02 on RI | ew2p-mssql-02 is covered by a Compute Savings Plan, not an RI |
+| Commitments tied to specific instances | RIs are Region-scoped and attach to whichever matching instance is running — no commitment is tied to either instance. Managed centrally via ProsperOps |
 
-The passive node licence-free benefit is the critical factor. RDS charges full SQL Server licence on both nodes — EC2 does not. This makes **RDS ~$30k–$38k/year more expensive** than the current EC2 setup.
+#### Licensing Position
 
-**Final recommendation: Stay on EC2.** The cost case does not support migration to RDS. If non-cost reasons (managed patching, HA simplicity, operational overhead) are raised in future, they would need to justify $30k–$38k/year in additional spend.
+| Assumption | Reality |
+|---|---|
+| Instances are BYOL | Not BYOL — both instances are AWS License Included, moved off SoftCat. No BYOL commitment to unwind |
+| Passive node carries a SQL Server licence charge | Passive node (ew2p-mssql-02) bills at plain Windows rate ($0.96/hr) vs $3.96/hr for the active node — worth ~$26,000/year. Still live as of this month's billing |
+
+#### Measured EC2 Cost — March 2026 (744-hour month, after commitment discounts)
+
+| Item | Monthly |
+|---|---|
+| ew2p-mssql-01 — compute and SQL licence | $2,753.92 |
+| ew2p-mssql-02 — compute only (passive node, no SQL licence) | $512.95 |
+| EBS — 5,360 GiB gp3 + provisioned throughput | $532.21 |
+| **Total** | **$3,799.08 (~$45,600/year)** |
+
+#### RDS Comparison — List Pricing (db.r6i.2xlarge SQL Server Enterprise LI Multi-AZ, eu-west-2)
+
+| Option | Compute & Licence | Storage | Annual |
+|---|---|---|---|
+| EC2 today (after commitments) | $38,413 | $6,387 | ~$45,600 |
+| RDS SQL Ent LI Multi-AZ (list) | $66,094 | $17,109 | ~$83,200 |
+
+- RDS compute: $7.545/hr
+- RDS storage: $0.266/GB-month vs $0.093/GB-month on EBS — same 5,360 GiB moves from $532 to $1,426/month
+- **Storage is the larger cost swing, not just the licence exemption**
+- **Migration costs ~$30k–$38k/year more** — low end assumes RDS picks up commitment discounts comparable to today. Backups and snapshots excluded on both sides.
+
+#### Commitment Timing Constraint
+
+Compute Savings Plans cover EC2 but not RDS. The current portfolio runs at >99% utilisation with almost no headroom — EC2 spend removed by a migration becomes unused commitment. Database Savings Plans are the RDS-side offset.
+
+| Plan | End Date |
+|---|---|
+| Compute Savings Plan A | 2026-10-18 |
+| Compute Savings Plan B | 2026-11-06 |
+| Compute Savings Plan C | 2027-06-14 |
+
+Any proposed cutover window should align with these end dates to avoid wasting committed spend.
+
+#### Open Dependency — AWS EC2 HA for SQL Server
+
+Kurtosys was onboarded onto an AWS programme for SQL Server HA in 2022. AWS launched a public equivalent — [Amazon EC2 High Availability for SQL Server](https://docs.aws.amazon.com/sql-server-ec2/latest/userguide/sql-high-availability.html) — on 2025-11-17. Whether Kurtosys is still on the 2022 programme or has moved to the GA feature needs confirming with the AWS account team. Hermann is picking this up. **Do not assume either way.**
+
+#### Still to Verify on the RDS Side
+
+- Standard RDS Multi-AZ pricing may already carry partial standby licence relief
+- Full passive node exemption on RDS Custom is reported but unconfirmed — and RDS Custom reintroduces much of the operational overhead this epic aims to remove
+
+#### Final Recommendation
+
+**Stay on EC2.** Migration costs ~$30k–$38k/year more — this is a deliberate trade, paying for managed patching, backups, and HA, not a saving. The epic as written expected cost-neutral or better. That premise does not hold.
+
+If non-cost reasons are raised in future (managed patching, HA simplicity, operational overhead reduction), they would need to explicitly justify $30k–$38k/year in additional annual spend.
 
 ---
 
