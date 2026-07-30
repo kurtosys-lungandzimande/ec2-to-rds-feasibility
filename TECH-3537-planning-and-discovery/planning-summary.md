@@ -1,9 +1,9 @@
 # SQL Server EC2 to RDS Feasibility — Planning & Discovery
 # [TECH-3537](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3537) — Investigation and Discovery Planning
 
-> **Status:** In Progress
+> **Status:** Investigation Complete — Recommendation: Stay on EC2
 > **Purpose:** Define the investigation scope, discovery approach, and definition of done for each child ticket before any investigation work begins.
-> **Last Updated:** 2026-07-23 — Discovery queries validated live on ew1r-mssql-01 (REL). Early findings documented below.
+> **Last Updated:** 2026-07-28 — Cost case closed. Hermann Lotter confirmed no 3-year RI, not BYOL, passive node runs licence-free on EC2. RDS is ~$30k–$38k/year more expensive. Migration not recommended.
 
 ---
 
@@ -229,6 +229,24 @@ A straight lift-and-shift of SQL Server from EC2 to RDS is not possible in its c
 
 ---
 
+### Cost Conclusion — 2026-07-28
+
+**Source:** Hermann Lotter, confirmed on TECH-3431 comment 2026-07-28
+
+The original cost assumptions underpinning this investigation were incorrect:
+
+| Assumption | Reality |
+|---|---|
+| 3-year RI purchased Apr 2025, expiry Apr 2028 | No 3-year RI exists — assumption was wrong |
+| Instances are BYOL | Instances are not BYOL |
+| Passive node carries a licence cost | Passive node (ew2p-mssql-02) runs without a SQL Server licence charge on EC2 |
+
+The passive node licence-free benefit is the critical factor. RDS charges full SQL Server licence on both nodes — EC2 does not. This makes **RDS ~$30k–$38k/year more expensive** than the current EC2 setup.
+
+**Final recommendation: Stay on EC2.** The cost case does not support migration to RDS. If non-cost reasons (managed patching, HA simplicity, operational overhead) are raised in future, they would need to justify $30k–$38k/year in additional spend.
+
+---
+
 ## Open Questions
 
 | # | Question | Why It Matters | Status |
@@ -236,9 +254,9 @@ A straight lift-and-shift of SQL Server from EC2 to RDS is not possible in its c
 | Q1 | How many SQL Server EC2 instances are in scope — full list with hostnames? | Cannot start inventory without knowing what to inventory | **Closed** — 4 instances confirmed, see Instances in Scope above |
 | Q2 | Which recent platform changes removed the historical blockers? | Theme A cannot assess blockers without knowing what changed | Open — needs Platform Engineering input |
 | Q3 | Who are the application/service owners for each instance? | Dependency mapping requires their input | Open |
-| Q9 | Confirm RI term and expiry for ew2p-mssql-01 — believed 3-year purchased 23 Apr 2025, expiry Apr 2028 | Determines the earliest cost-neutral migration window — if 3-year, cannot migrate before Apr 2028 without double-paying | Open — sent to account manager 2026-07-28 |
-| Q10 | Confirm whether ew2p-mssql-02 is also on a Reserved Instance, and if so term and expiry | ew2p-mssql-02 cost has been consistent at ~$640–$820/month — may also be RI-covered | Open — sent to account manager 2026-07-28 |
-| Q11 | Confirm BYOL license commitment — any active license lock-in tied to the EC2 instances? | Need to know if there is any Microsoft license commitment that affects migration timing | Open — sent to account manager 2026-07-28 |
+| Q9 | Confirm RI term and expiry for ew2p-mssql-01 — believed 3-year purchased 23 Apr 2025, expiry Apr 2028 | Determines the earliest cost-neutral migration window — if 3-year, cannot migrate before Apr 2028 without double-paying | **Closed** — Hermann Lotter confirmed 2026-07-28: no 3-year RI exists, no April 2028 expiry. Assumption was incorrect. |
+| Q10 | Confirm whether ew2p-mssql-02 is also on a Reserved Instance, and if so term and expiry | ew2p-mssql-02 cost has been consistent at ~$640–$820/month — may also be RI-covered | **Closed** — Hermann Lotter confirmed 2026-07-28: no RI on ew2p-mssql-02. |
+| Q11 | Confirm BYOL license commitment — any active license lock-in tied to the EC2 instances? | Need to know if there is any Microsoft license commitment that affects migration timing | **Closed** — Hermann Lotter confirmed 2026-07-28: instances are not BYOL. The passive node (ew2p-mssql-02) runs without a SQL Server licence charge on EC2 — this benefit does not exist on RDS, making RDS ~$30k–$38k/year more expensive. |
 | Q12 | Are there any RDS Reserved Instance options or private pricing available to close the cost gap? | RDS on-demand is ~$409–$589/month more than current EC2 spend — RI pricing could change the cost case | Open — sent to account manager 2026-07-28 |
 | Q13 | Has AWS License Mobility been formally activated for RDS previously, or is this a first-time activation? | Administrative step — must be initiated before migration begins regardless of timing | Open |
 | Q4 | Do we have access to all EC2 instances to run discovery queries directly? | Blocks all of Theme A | **Closed** — access confirmed, queries validated on REL 2026-07-23 |
