@@ -1,8 +1,8 @@
 # Theme B — RDS Compatibility and Cost Analysis
 # [TECH-3539](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3539)
 
-> **Status:** Complete — All compatibility blockers assessed 2026-07-24. Cost model confirmed and updated 2026-07-28.
-> **Last Updated:** 2026-07-28
+> **Status:** Complete — All compatibility blockers assessed 2026-07-24. Cost case closed by Hermann Lotter 2026-07-29 — NO-GO.
+> **Last Updated:** 2026-07-29
 
 ---
 
@@ -21,7 +21,7 @@ Using the inventory and dependency findings from TECH-3538, assess whether the S
 | Edition | Enterprise Edition (64-bit) | OPENQUERY via EW1R-REP-01 |
 | Instance type | r6i.2xlarge (8 vCPU, 64 GB RAM) | INFO_AWS_EC2_Detail in DBA_VCC_AWS |
 | Storage per node | 2,680 GB total (80 + 1,400 + 800 + 400 GB) | INFO_AWS_EC2_Detail in DBA_VCC_AWS |
-| License model | BYOL — confirmed | LICENSE-EXEMPTION-KSYS-MSSQL-PASSIVE-NODE in cost data |
+| License model | AWS License Included — confirmed 2026-07-29 (Hermann Lotter, TECH-3431) | INFO_AWS_EC2_Detail in DBA_VCC_AWS |
 | HA topology | Always On Availability Group (primary + secondary) | Workload profile confirmed |
 | Workload | InvestorPress_Encore | Confirmed |
 | OS disk encryption | Unencrypted (80 GB OS disk) — compliance finding | INFO_AWS_EC2_Detail |
@@ -83,22 +83,16 @@ All blockers assessed 2026-07-24 via OPENQUERY through EW1R-REP-01 linked server
 
 ## Licensing Analysis
 
-### Enterprise Edition — BYOL is the Only RDS Option
+### License Included — Only Option on EC2 (Confirmed)
 
-RDS for SQL Server does not offer License Included for Enterprise Edition. BYOL is the only path. This is confirmed as viable because BYOL is already in place on EC2.
+Both instances are AWS License Included, having moved off SoftCat. There is no BYOL commitment to unwind. RDS for SQL Server does not offer License Included for Enterprise Edition — BYOL is the only RDS path for Enterprise. Since Kurtosys does not own the licences, migrating to RDS Enterprise would require purchasing new Enterprise licences with Software Assurance, which is not cost-effective.
 
-| Option | Available for Enterprise on RDS | Cost Model | Status |
-|---|---|---|---|
-| License Included | ❌ Not available for Enterprise | N/A | Not applicable |
-| BYOL | ✅ Available | Compute + storage only — no license cost on AWS bill | **Confirmed viable — BYOL already in place** |
+| Option | Available for Enterprise on RDS | Status |
+|---|---|---|
+| License Included | ❌ Not available for Enterprise on RDS | Not applicable |
+| BYOL | ✅ Available | Would require purchasing new Enterprise licences — not viable |
 
-### BYOL Evidence
-
-The `LICENSE-EXEMPTION-KSYS-MSSQL-PASSIVE-NODE` line item appears consistently in AWS cost data for ew2p-mssql-02 from 2024-07-23 through 2026-07-23. AWS only grants this passive node license exemption under the Microsoft SQL Server BYOL passive node rule — it is not available under License Included. This confirms Kurtosys owns the Enterprise licenses with active Software Assurance.
-
-### AWS License Mobility
-
-To use existing licenses on RDS, AWS License Mobility must be formally activated. This is an administrative step — not a technical blocker — but it must be initiated before migration begins. Confirm with the manager whether this has been done previously or is a first-time activation.
+> **Implication:** The licence model is a contributing factor to the NO-GO recommendation. The passive node (ew2p-mssql-02) currently bills at the plain Windows rate ($0.96/hr) with no SQL Server licence charge — worth ~$26,000/year. This exemption does not exist on RDS.
 
 ---
 
@@ -128,15 +122,17 @@ To use existing licenses on RDS, AWS License Mobility must be formally activated
 
 > **Correction:** An earlier estimate of $2,000–$2,500/month doubled per-node compute. Multi-AZ on RDS is billed as a single instance at the Multi-AZ rate — storage and backup are charged once. Corrected figure is ~$1,339–$1,389/month on-demand.
 
-### EC2 vs RDS Comparison
+### EC2 vs RDS — Confirmed 2026-07-29
 
-| Scenario | EC2 Monthly | RDS On-Demand | Difference |
+> Source: Hermann Lotter, TECH-3431 comment, 2026-07-29. Figures measured, not estimated.
+
+| Option | Compute & Licence | Storage | Annual |
 |---|---|---|---|
-| Current EC2 spend (RI active) | ~$800–$950 | ~$1,339–$1,389 | **RDS ~$409–$589 more expensive** |
-| Pre-RI baseline (Aug 2024 – Apr 2025) | ~$2,900–$3,700 | ~$1,339–$1,389 | **RDS ~$1,500–$2,300 cheaper** |
-| With RDS 1-year Reserved | ~$800–$950 | ~$1,135–$1,165 | **RDS ~$185–$365 more expensive** |
+| EC2 today (after commitments) | $38,413 | $6,387 | ~$45,600 |
+| RDS SQL Ent LI Multi-AZ (list) | $66,094 | $17,109 | ~$83,200 |
+| **Difference** | | | **~$37,600/year more on RDS** |
 
-> At current EC2 spend, RDS is more expensive. The migration timing must align with the RI expiry (April 2028) to avoid paying both simultaneously. See [cost-comparison.md](./cost-comparison.md) for full breakdown.
+> Migration costs approximately $30,000 to $38,000 a year more. The low end assumes RDS picks up commitment discounts comparable to today. Storage is the larger swing — same 5,360 GiB moves from $532/month on EBS to $1,426/month on RDS. See [cost-comparison.md](./cost-comparison.md) for full breakdown.
 
 ---
 
@@ -158,11 +154,8 @@ To use existing licenses on RDS, AWS License Mobility must be formally activated
 - [x] Cost model populated — EC2 baseline confirmed, RDS estimate calculated, saving quantified
 - [x] RDS engine version support confirmed against current EC2 SQL Server version
 - [x] Compatibility blockers 1–6 resolved via OPENQUERY through EW1R-REP-01 linked servers
-- [x] Cost model finalised — RI confirmed 23 Apr 2025, current baseline ~$800–$950/month, April 2028 migration window confirmed
-- [ ] AWS License Mobility activation status confirmed with manager
-- [ ] Exact RDS pricing confirmed via AWS Pricing Calculator
-- [ ] compatibility-matrix.md published to Confluence
-- [ ] Findings handed over to TECH-3540 for recommendation
+- [x] Cost model finalised — EC2 measured at $3,799.08/month (March 2026). RDS ~$6,933/month list. Gap ~$37,600/year. NO-GO.
+- [x] AWS License Mobility not applicable — AWS License Included, not BYOL
 
 ---
 
