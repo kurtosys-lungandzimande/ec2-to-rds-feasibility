@@ -97,6 +97,8 @@ RDS for SQL Server does not offer License Included for Enterprise Edition. BYOL 
 | **Total** | **$3,799.08 (~$45,600/year)** |
 
 > **Do not use the datalake CUR table for cost baselines on this epic.** Use Cost Explorer and deduplicated CUR line items only.
+>
+> **Access note:** Cost Explorer access to the InvestorPress_Encore_Prod billing account is not available under the current login — access denied when attempting to verify. Hermann Lotter's figures are the authoritative source for this epic. To independently verify in future, request read-only Cost Explorer access to the central billing account from Hermann or Jacobus.
 
 ### Historical Monthly Cost — from MON_AWS_Entity_Cost (context only)
 
