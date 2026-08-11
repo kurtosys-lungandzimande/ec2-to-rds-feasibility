@@ -2,7 +2,7 @@
 # [TECH-3540](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3540)
 
 > **Status:** Investigation Complete — Recommendation: NO-GO. Stay on EC2.
-> **Last Updated:** 2026-07-28 — Cost case closed. Hermann Lotter confirmed no 3-year RI, not BYOL, passive node licence-free on EC2. RDS ~$37,600/year more expensive.
+> **Last Updated:** 2026-08-06 — 1-year RI model added, Hermann follow-up answers (Q2, Q5) documented. Q1 ownership clarified.
 
 ---
 
@@ -95,27 +95,30 @@ RDS does not support Database Mail. Before migration, this needs to be replaced 
 | EBS — 5,360 GiB gp3 + provisioned throughput | $532.21 |
 | **Total** | **$3,799.08 (~$45,600/year)** |
 
-**RDS comparison — list pricing (db.r6i.2xlarge SQL Server Enterprise LI Multi-AZ, eu-west-2):**
+**RDS comparison — corrected like-for-like (db.r6i.2xlarge SQL Server Enterprise LI Multi-AZ, eu-west-2):**
 
-| Option | Compute & Licence | Storage | Annual |
-|---|---|---|---|
-| EC2 today (after commitments) | $38,413 | $6,387 | ~$45,600 |
-| RDS SQL Ent LI Multi-AZ (list) | $66,094 | $17,109 | ~$83,200 |
+| Option | Compute & Licence | Storage | Annual | Gap vs EC2 |
+|---|---|---|---|---|
+| EC2 today (after commitments) | $38,413 | $6,387 | ~$45,600 | baseline |
+| RDS on-demand (list) | $66,094 | $17,109 | ~$83,200 | +$37,600/year |
+| RDS 1-yr RI No Upfront | ~$45,605 | $17,109 | ~$62,700 | +$17,100/year |
+| RDS 1-yr RI All Upfront | ~$44,283 | $17,109 | ~$61,400 | +$15,800/year |
 
-**RDS is ~$37,600/year more expensive.** Storage is the larger swing — same 5,360 GiB moves from $532/month on EBS to $1,426/month on RDS.
+> The original comparison was list RDS vs discounted EC2 — not a fair like-for-like. With a 1-year RI the gap is ~$16k/year, not ~$38k. The NO-GO recommendation holds either way. The ~$16k/year buys managed patching, automated backups, automated CHECKDB, and Multi-AZ HA with no manual EC2 HA programme dependency. If non-cost reasons are raised in future, the question is whether that operational overhead reduction justifies ~$16k/year.
 
 **What the original assumptions got wrong:**
 
 | Original Assumption | Reality |
 |---|---|
-| 3-year RI purchased Apr 2025, expiry Apr 2028 | No 3-year RI. 1-year convertible ended 2025-12-02. Current coverage ends 2026-09-08 |
+| 3-year RI purchased Apr 2025, expiry Apr 2028 | No 3-year RI. 1-year convertible ended 2025-12-02. Current coverage ends 2026-09-08 but ProsperOps rolls continuously — not a hard cliff (Hermann confirmed 2026-08-06) |
 | Instances are BYOL | Not BYOL — AWS License Included. No Microsoft licence commitment to unwind |
+| Kurtosys could use BYOL on RDS | No SQL Server licences with Software Assurance held (Hermann confirmed 2026-08-06) — BYOL on RDS is not an option |
 | Passive node carries a SQL Server licence charge | Passive node (ew2p-mssql-02) bills at plain Windows rate ($0.96/hr) — worth ~$26,000/year saving. RDS does not offer this |
 | Current EC2 cost ~$800–$950/month | Actual: $3,799.08/month — the RI was short-term and has rolled off |
 
-**Commitment timing note:** Compute Savings Plans cover EC2 but not RDS. Current plans end 2026-10-18, 2026-11-06, and 2027-06-14. Any future migration would need to align with these dates to avoid wasting committed spend.
+**Commitment timing note:** Compute Savings Plans cover the EC2 compute portion only — the SQL Server licence fee is always on-demand regardless. SPs do not cover RDS. Current plans end 2026-10-18, 2026-11-06, and 2027-06-14. Any future migration must be flagged to Hermann before ProsperOps buys a new Compute Savings Plan — otherwise you lock into 3 more years of EC2 compute commitment for capacity you're about to stop using (Hermann confirmed 2026-08-06).
 
-**Open dependency:** AWS EC2 HA for SQL Server — Kurtosys was onboarded onto an AWS programme in 2022. AWS launched a public equivalent on 2025-11-17. Whether Kurtosys is still on the 2022 programme or has moved to the GA feature needs confirming with the AWS account team. Hermann is picking this up. Do not assume either way.
+**Open dependency:** AWS EC2 HA for SQL Server — Kurtosys was onboarded onto an AWS programme in 2022. AWS launched a public equivalent on 2025-11-17. Hermann confirmed 2026-08-06 that this is owned by the team managing the servers day to day, not Hermann. Platform Engineering to confirm which programme is active.
 
 ---
 
@@ -136,9 +139,12 @@ RDS does not support Database Mail. Before migration, this needs to be replaced 
 |---|---|
 | Confirm RI term and expiry for ew2p-mssql-01 | Closed — no 3-year RI. Hermann confirmed 2026-07-29 |
 | Confirm RI status for ew2p-mssql-02 | Closed — Compute Savings Plan, not RI. Hermann confirmed 2026-07-29 |
-| Confirm BYOL license commitment | Closed — not BYOL, AWS License Included. Hermann confirmed 2026-07-29 |
+| Confirm BYOL license commitment | Closed — not BYOL, AWS License Included. No SQL Server licences with SA held. Hermann confirmed 2026-07-29 and 2026-08-06 |
+| ProsperOps rollover — September 2026 cliff | Closed — not a hard cliff, ProsperOps rolls continuously. Hermann confirmed 2026-08-06 |
+| Compute Savings Plans — SQL Server coverage | Closed — SPs cover EC2 compute only, not SQL Server licence, not RDS. AWS public pricing mechanics confirmed 2026-08-06 |
+| RDS 1-year RI cost model | Closed — ~$62,700–$61,400/year with 1-yr RI vs ~$45,600/year EC2. Gap ~$16k/year. Calculated 2026-08-06 |
 | Manager sign-off on NO-GO recommendation | Open — pending Jacobus sign-off |
-| AWS EC2 HA programme — 2022 vs GA feature | Open — Hermann picking up with AWS account team |
+| AWS EC2 HA programme — 2022 vs GA feature | Open — Hermann confirmed 2026-08-06 this is owned by Platform Engineering, not Hermann |
 
 ---
 
@@ -160,3 +166,16 @@ RDS does not support Database Mail. Before migration, this needs to be replaced 
 | [TECH-3431](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3431) | Parent epic |
 | [TECH-3538](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3538) | Theme A — inventory and dependency |
 | [TECH-3539](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3539) | Theme B — compatibility and cost |
+
+---
+
+## Public Pricing References
+
+| Reference | URL | Used For |
+|---|---|---|
+| RDS SQL Server pricing | [aws.amazon.com/rds/sqlserver/pricing](https://aws.amazon.com/rds/sqlserver/pricing/) | On-demand and RI rates for db.r6i.2xlarge SQL Ent LI Multi-AZ eu-west-2 |
+| RDS Reserved Instances | [aws.amazon.com/rds/reserved-instances](https://aws.amazon.com/rds/reserved-instances/) | 1-year RI discount tiers (No Upfront ~31%, All Upfront ~33%) |
+| Compute Savings Plans pricing | [aws.amazon.com/savingsplans/compute-pricing](https://aws.amazon.com/savingsplans/compute-pricing/) | Confirms SPs apply to EC2 compute rate only |
+| Savings Plans — what is covered | [docs.aws.amazon.com/savingsplans/latest/userguide/what-is-savings-plans.html](https://docs.aws.amazon.com/savingsplans/latest/userguide/what-is-savings-plans.html) | Confirms SQL Server licence fee is always on-demand regardless of SP coverage |
+| AWS Pricing Calculator | [calculator.aws](https://calculator.aws/pricing/2/home) | Build and share RDS cost model for Jacobus sign-off |
+| EC2 HA for SQL Server (GA feature) | [docs.aws.amazon.com/sql-server-ec2/latest/userguide/sql-high-availability.html](https://docs.aws.amazon.com/sql-server-ec2/latest/userguide/sql-high-availability.html) | GA feature launched 2025-11-17 — Platform Engineering to confirm which programme Kurtosys is on |

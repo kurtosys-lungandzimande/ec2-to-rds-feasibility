@@ -1,18 +1,23 @@
 # Cost Comparison — EC2 vs RDS for SQL Server
 # [TECH-3539](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3539)
 
-> **Status:** Complete — Cost case closed by Hermann Lotter 2026-07-29. All figures corrected.
-> **Last Updated:** 2026-07-29
+> **Status:** Complete — Cost case closed by Hermann Lotter 2026-07-29. 1-year RI model added 2026-08-06 (Hermann follow-up).
+> **Last Updated:** 2026-08-06
 
 ---
 
 ## Summary
 
-| Scenario | EC2 Monthly Cost | RDS Monthly Cost | Difference |
-|---|---|---|---|
-| EC2 today (after commitments) | $3,799.08 | ~$6,933 | **RDS ~$3,134/month (~$37,600/year) more expensive** |
+| Scenario | Annual Cost | Gap vs EC2 |
+|---|---|---|
+| EC2 today (after commitments) | ~$45,600 | baseline |
+| RDS on-demand (list) | ~$83,200 | +$37,600/year more |
+| RDS 1-yr RI No Upfront | ~$62,700 | +$17,100/year more |
+| RDS 1-yr RI All Upfront | ~$61,400 | +$15,800/year more |
 
-> **Source:** Hermann Lotter, TECH-3431 comment, 2026-07-29. EC2 figures measured from Cost Explorer and deduplicated CUR line items. RDS figures at list pricing — db.r6i.2xlarge SQL Server Enterprise License Included Multi-AZ, eu-west-2.
+> **Source:** EC2 figures — Hermann Lotter, TECH-3431 comment, 2026-07-29, measured from Cost Explorer and deduplicated CUR line items. RDS on-demand — Hermann Lotter, TECH-3431 comment, 2026-07-29, list pricing. RDS 1-year RI figures — AWS public pricing, db.r6i.2xlarge SQL Server Enterprise LI Multi-AZ eu-west-2, calculated 2026-08-06.
+>
+> **Note on the original comparison:** The previous comparison was list RDS vs discounted EC2 — not a fair like-for-like. The 1-year RI figures above are the corrected comparison. The NO-GO recommendation holds either way but the gap is ~$16k/year with a 1-year RI, not ~$38k.
 >
 > **Key driver:** The passive node (ew2p-mssql-02) bills at the plain Windows rate ($0.96/hr) on EC2 — no SQL Server licence charge. This is worth ~$26,000/year. RDS does not offer this exemption. Storage is the second major swing — same 5,360 GiB moves from $532/month on EBS to $1,426/month on RDS.
 
@@ -29,7 +34,9 @@
 | ew2p-mssql-02 | Covered by Compute Savings Plan (not RI) |
 | License model | AWS License Included — not BYOL. Moved off SoftCat. |
 | Passive node billing | ew2p-mssql-02 bills at plain Windows rate ($0.96/hr) vs $3.96/hr for active node — ~$26,000/year saving |
-| Compute Savings Plans | Portfolio runs above 99% utilisation. Plans end 2026-10-18, 2026-11-06, 2027-06-14. Compute SPs cover EC2 but not RDS. |
+| Compute Savings Plans | Portfolio runs above 99% utilisation. Plans end 2026-10-18, 2026-11-06, 2027-06-14. Compute SPs cover EC2 compute portion only — SQL Server licence fee is always on-demand regardless. SPs do not cover RDS. |
+| ProsperOps rollover | Confirmed by Hermann 2026-08-06 — RIs are convertible and ProsperOps rolls them continuously. September 2026 is not a hard cliff. EC2 cost baseline is stable beyond that date. |
+| BYOL licences | Confirmed by Hermann 2026-08-06 — Kurtosys holds no SQL Server licences with Software Assurance. BYOL on RDS is not an option. |
 
 > **What the original cost data showed:** The ~88% cost drop on ew2p-mssql-01 from April 2025 was real but misread. It was a short-term RI (1-year convertible), not a 3-year term. ProsperOps exchanges convertible RIs as they roll off — coverage is continuous by design, which is why cost stayed flat through April 2026. The flat cost was not evidence of a 3-year term.
 
@@ -133,30 +140,24 @@
 
 ---
 
-## RDS Cost — List Pricing (db.r6i.2xlarge SQL Ent LI Multi-AZ, eu-west-2)
+## RDS Cost — Full Comparison (db.r6i.2xlarge SQL Ent LI Multi-AZ, eu-west-2)
 
-> Source: Hermann Lotter, TECH-3431 comment, 2026-07-29.
+> On-demand source: Hermann Lotter, TECH-3431 comment, 2026-07-29. 1-year RI figures: AWS public pricing, calculated 2026-08-06. On-demand hourly rate: $7.545/hr. Storage: 5,360 GiB at $0.266/GB-month.
 
-| Option | Compute & Licence | Storage | Annual |
-|---|---|---|---|
-| EC2 today (after commitments) | $38,413 | $6,387 | ~$45,600 |
-| RDS SQL Ent LI Multi-AZ (list) | $66,094 | $17,109 | ~$83,200 |
+| Option | Compute & Licence | Storage | Annual | Gap vs EC2 |
+|---|---|---|---|---|
+| EC2 today (after commitments) | $38,413 | $6,387 | ~$45,600 | baseline |
+| RDS SQL Ent LI Multi-AZ (list) | $66,094 | $17,109 | ~$83,200 | +$37,600/year |
+| RDS 1-yr RI No Upfront | ~$45,605 | $17,109 | ~$62,700 | +$17,100/year |
+| RDS 1-yr RI All Upfront | ~$44,283 | $17,109 | ~$61,400 | +$15,800/year |
 
 > Storage is the larger swing — same 5,360 GiB moves from $532/month on EBS ($0.093/GB-month) to $1,426/month on RDS ($0.266/GB-month for a SQL Server mirror).
 >
+> The 1-year RI cuts the gap roughly in half. At ~$16k/year more, RDS buys managed patching, automated backups, automated CHECKDB, and Multi-AZ HA with no manual EC2 HA programme dependency. The question for any future reconsideration is whether that operational overhead reduction justifies ~$16k/year.
+>
+> Compute Savings Plans cover the EC2 compute portion only — the SQL Server licence fee on `ew2p-mssql-01` is always billed at on-demand rate regardless of SP coverage. SPs do not apply to RDS.
+>
 > Standard RDS Multi-AZ pricing may carry partial standby licence relief — unconfirmed. Full passive node exemption on RDS Custom is reported but unconfirmed, and RDS Custom reintroduces much of the operational overhead this epic aims to remove.
-
----
-
-## EC2 vs RDS Comparison — Confirmed 2026-07-29
-
-| Option | Compute & Licence | Storage | Annual |
-|---|---|---|---|
-| EC2 today (after commitments) | $38,413 | $6,387 | ~$45,600 |
-| RDS SQL Ent LI Multi-AZ (list) | $66,094 | $17,109 | ~$83,200 |
-| **Difference** | | | **~$37,600/year more on RDS** |
-
-> The low end of the gap (~$30,000/year) assumes RDS picks up commitment discounts comparable to today. Backups and snapshots excluded on both sides.
 
 ---
 
@@ -177,7 +178,8 @@
 | # | Item | Owner | Status |
 |---|---|---|---|
 | 1 | Manager sign-off on NO-GO recommendation | Jacobus | Open |
-| 2 | AWS EC2 HA programme — 2022 programme vs GA feature (launched 2025-11-17) | Hermann | Open — Hermann picking up with AWS account team |
+| 2 | AWS EC2 HA programme — 2022 programme vs GA feature (launched 2025-11-17) | Lunga / Platform Engineering | Open — Hermann confirmed 2026-08-06 this is owned by the team that manages the servers day to day, not Hermann |
+| 3 | Second RI for Windows with SQL Server Enterprise — confirm whether it is matched or sitting idle | Lunga | Open — Hermann noted two RIs exist for Windows SQL Ent but only mssql-01 bills under that code. Check in AWS console. |
 
 ---
 
@@ -185,8 +187,20 @@
 
 | Resource | Location |
 |---|---|
-| AWS Pricing Calculator | [https://calculator.aws](https://calculator.aws) |
+| AWS Pricing Calculator | [https://calculator.aws](https://calculator.aws/pricing/2/home) |
 | Compatibility matrix | [compatibility-matrix.md](./compatibility-matrix.md) |
 | Inventory and cost source | [inventory.md](../TECH-3538-inventory-and-dependency/inventory.md) |
 | Go/no-go recommendation | [go-no-go-recommendation.md](../TECH-3540-recommendation-and-handover/go-no-go-recommendation.md) |
 | TECH-3539 | [Jira](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3539) |
+
+---
+
+## Public Pricing References
+
+| Reference | URL | Used For |
+|---|---|---|
+| RDS SQL Server pricing | [aws.amazon.com/rds/sqlserver/pricing](https://aws.amazon.com/rds/sqlserver/pricing/) | On-demand and RI rates for db.r6i.2xlarge SQL Ent LI Multi-AZ eu-west-2 |
+| RDS Reserved Instances | [aws.amazon.com/rds/reserved-instances](https://aws.amazon.com/rds/reserved-instances/) | 1-year RI discount tiers (No Upfront ~31%, All Upfront ~33%) |
+| Compute Savings Plans pricing | [aws.amazon.com/savingsplans/compute-pricing](https://aws.amazon.com/savingsplans/compute-pricing/) | Confirms SPs apply to EC2 compute rate only |
+| Savings Plans — what is covered | [docs.aws.amazon.com/savingsplans/latest/userguide/what-is-savings-plans.html](https://docs.aws.amazon.com/savingsplans/latest/userguide/what-is-savings-plans.html) | Confirms SQL Server licence fee is always on-demand regardless of SP coverage |
+| AWS Pricing Calculator | [calculator.aws](https://calculator.aws/pricing/2/home) | Build and share RDS cost model for Jacobus sign-off |

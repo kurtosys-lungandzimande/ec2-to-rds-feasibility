@@ -1,8 +1,8 @@
 # Theme B — RDS Compatibility and Cost Analysis
 # [TECH-3539](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3539)
 
-> **Status:** Complete — All compatibility blockers assessed 2026-07-24. Cost case closed by Hermann Lotter 2026-07-29 — NO-GO.
-> **Last Updated:** 2026-07-29
+> **Status:** Complete — All compatibility blockers assessed 2026-07-24. Cost case closed by Hermann Lotter 2026-07-29. 1-year RI model and Hermann follow-up answers added 2026-08-06.
+> **Last Updated:** 2026-08-06
 
 ---
 
@@ -85,12 +85,12 @@ All blockers assessed 2026-07-24 via OPENQUERY through EW1R-REP-01 linked server
 
 ### License Included — Only Option on EC2 (Confirmed)
 
-Both instances are AWS License Included, having moved off SoftCat. There is no BYOL commitment to unwind. RDS for SQL Server does not offer License Included for Enterprise Edition — BYOL is the only RDS path for Enterprise. Since Kurtosys does not own the licences, migrating to RDS Enterprise would require purchasing new Enterprise licences with Software Assurance, which is not cost-effective.
+Both instances are AWS License Included, having moved off SoftCat. There is no BYOL commitment to unwind. RDS for SQL Server does not offer License Included for Enterprise Edition — BYOL is the only RDS path for Enterprise. Kurtosys holds no SQL Server licences with Software Assurance (confirmed by Hermann Lotter 2026-08-06) — BYOL on RDS is not an option.
 
 | Option | Available for Enterprise on RDS | Status |
 |---|---|---|
 | License Included | ❌ Not available for Enterprise on RDS | Not applicable |
-| BYOL | ✅ Available | Would require purchasing new Enterprise licences — not viable |
+| BYOL | ✅ Available | Not viable — Kurtosys holds no SQL Server licences with Software Assurance. Confirmed by Hermann 2026-08-06. |
 
 > **Implication:** The licence model is a contributing factor to the NO-GO recommendation. The passive node (ew2p-mssql-02) currently bills at the plain Windows rate ($0.96/hr) with no SQL Server licence charge — worth ~$26,000/year. This exemption does not exist on RDS.
 
@@ -122,17 +122,18 @@ Both instances are AWS License Included, having moved off SoftCat. There is no B
 
 > **Correction:** An earlier estimate of $2,000–$2,500/month doubled per-node compute. Multi-AZ on RDS is billed as a single instance at the Multi-AZ rate — storage and backup are charged once. Corrected figure is ~$1,339–$1,389/month on-demand.
 
-### EC2 vs RDS — Confirmed 2026-07-29
+### EC2 vs RDS — Full Comparison (updated 2026-08-06)
 
-> Source: Hermann Lotter, TECH-3431 comment, 2026-07-29. Figures measured, not estimated.
+> On-demand source: Hermann Lotter, TECH-3431 comment, 2026-07-29. 1-year RI figures: AWS public pricing, calculated 2026-08-06.
 
-| Option | Compute & Licence | Storage | Annual |
-|---|---|---|---|
-| EC2 today (after commitments) | $38,413 | $6,387 | ~$45,600 |
-| RDS SQL Ent LI Multi-AZ (list) | $66,094 | $17,109 | ~$83,200 |
-| **Difference** | | | **~$37,600/year more on RDS** |
+| Option | Compute & Licence | Storage | Annual | Gap vs EC2 |
+|---|---|---|---|---|
+| EC2 today (after commitments) | $38,413 | $6,387 | ~$45,600 | baseline |
+| RDS SQL Ent LI Multi-AZ (list) | $66,094 | $17,109 | ~$83,200 | +$37,600/year |
+| RDS 1-yr RI No Upfront | ~$45,605 | $17,109 | ~$62,700 | +$17,100/year |
+| RDS 1-yr RI All Upfront | ~$44,283 | $17,109 | ~$61,400 | +$15,800/year |
 
-> Migration costs approximately $30,000 to $38,000 a year more. The low end assumes RDS picks up commitment discounts comparable to today. Storage is the larger swing — same 5,360 GiB moves from $532/month on EBS to $1,426/month on RDS. See [cost-comparison.md](./cost-comparison.md) for full breakdown.
+> The 1-year RI cuts the gap roughly in half — from ~$37,600/year down to ~$16k/year. The original comparison (list RDS vs discounted EC2) overstated the gap. The NO-GO recommendation holds either way. See [cost-comparison.md](./cost-comparison.md) for full breakdown.
 
 ---
 
@@ -154,8 +155,11 @@ Both instances are AWS License Included, having moved off SoftCat. There is no B
 - [x] Cost model populated — EC2 baseline confirmed, RDS estimate calculated, saving quantified
 - [x] RDS engine version support confirmed against current EC2 SQL Server version
 - [x] Compatibility blockers 1–6 resolved via OPENQUERY through EW1R-REP-01 linked servers
-- [x] Cost model finalised — EC2 measured at $3,799.08/month (March 2026). RDS ~$6,933/month list. Gap ~$37,600/year. NO-GO.
+- [x] Cost model finalised — EC2 measured at $3,799.08/month (March 2026). RDS ~$6,933/month list, ~$5,226/month with 1-year RI. Gap ~$37,600/year list or ~$16k/year with 1-year RI. NO-GO.
 - [x] AWS License Mobility not applicable — AWS License Included, not BYOL
+- [x] BYOL confirmed not viable — Kurtosys holds no SQL Server licences with Software Assurance (Hermann confirmed 2026-08-06)
+- [x] ProsperOps rollover confirmed — September 2026 not a hard cliff, coverage continuous by design (Hermann confirmed 2026-08-06)
+- [x] Compute Savings Plans confirmed — cover EC2 compute portion only, not SQL Server licence, not RDS (AWS public pricing mechanics)
 
 ---
 
@@ -175,3 +179,16 @@ Both instances are AWS License Included, having moved off SoftCat. There is no B
 | [TECH-3537](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3537) | Planning ticket |
 | [TECH-3538](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3538) | Theme A — inventory source |
 | [TECH-3540](https://kurtosys-prod-eng.atlassian.net/jira/software/c/projects/TECH/boards/795?selectedIssue=TECH-3540) | Theme C — blocked on this |
+
+---
+
+## Public Pricing References
+
+| Reference | URL | Used For |
+|---|---|---|
+| RDS SQL Server pricing | [aws.amazon.com/rds/sqlserver/pricing](https://aws.amazon.com/rds/sqlserver/pricing/) | On-demand and RI rates for db.r6i.2xlarge SQL Ent LI Multi-AZ eu-west-2 |
+| RDS Reserved Instances | [aws.amazon.com/rds/reserved-instances](https://aws.amazon.com/rds/reserved-instances/) | 1-year RI discount tiers (No Upfront ~31%, All Upfront ~33%) |
+| Compute Savings Plans pricing | [aws.amazon.com/savingsplans/compute-pricing](https://aws.amazon.com/savingsplans/compute-pricing/) | Confirms SPs apply to EC2 compute rate only |
+| Savings Plans — what is covered | [docs.aws.amazon.com/savingsplans/latest/userguide/what-is-savings-plans.html](https://docs.aws.amazon.com/savingsplans/latest/userguide/what-is-savings-plans.html) | Confirms SQL Server licence fee is always on-demand regardless of SP coverage |
+| AWS Pricing Calculator | [calculator.aws](https://calculator.aws/pricing/2/home) | Build and share RDS cost model for Jacobus sign-off |
+| EC2 HA for SQL Server (GA feature) | [docs.aws.amazon.com/sql-server-ec2/latest/userguide/sql-high-availability.html](https://docs.aws.amazon.com/sql-server-ec2/latest/userguide/sql-high-availability.html) | GA feature launched 2025-11-17 — Platform Engineering to confirm which programme Kurtosys is on |
