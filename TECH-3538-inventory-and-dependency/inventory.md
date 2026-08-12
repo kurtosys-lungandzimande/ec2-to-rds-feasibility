@@ -87,7 +87,7 @@ RDS for SQL Server does not offer License Included for Enterprise Edition. BYOL 
 
 ## Actual EC2 Cost — Confirmed 2026-07-29
 
-> Source: Hermann Lotter, TECH-3431 comment, 2026-07-29. March 2026, full 744-hour month, both instances plus storage, at the effective rate after commitment discounts. Cross-checked against Cost Explorer to within one percent.
+> Source: Hermann Lotter, TECH-3431 comment, 2026-07-29. March 2026, full 744-hour month, both instances plus storage, at the effective rate after commitment discounts.
 
 | Item | Monthly |
 |---|---|
@@ -95,41 +95,6 @@ RDS for SQL Server does not offer License Included for Enterprise Edition. BYOL 
 | ew2p-mssql-02 — compute only (passive node, no SQL licence) | $512.95 |
 | EBS — 5,360 GiB gp3 + provisioned throughput | $532.21 |
 | **Total** | **$3,799.08 (~$45,600/year)** |
-
-> **Do not use the datalake CUR table for cost baselines on this epic.** Use Cost Explorer and deduplicated CUR line items only.
->
-> **Access note:** Cost Explorer access to the InvestorPress_Encore_Prod billing account is not available under the current login — access denied when attempting to verify. Hermann Lotter's figures are the authoritative source for this epic. To independently verify in future, request read-only Cost Explorer access to the central billing account from Hermann or Jacobus.
-
-### Historical Monthly Cost — from MON_AWS_Entity_Cost (context only)
-
-> Source: `MON_AWS_Entity_Cost` on EW1R-REP-01. Duplicates removed using MIN per day before summing. Provided for context — authoritative figures are from Hermann's Cost Explorer data above.
-
-| Month | ew2p-mssql-01 | ew2p-mssql-02 | Combined | Notes |
-|---|---|---|---|---|
-| 2026-07 (partial) | $190 | $662 | **$852** | Month in progress |
-| 2026-06 | $211 | $715 | **$926** | |
-| 2026-05 | $188 | $640 | **$828** | |
-| 2026-04 | $213 | $709 | **$922** | |
-| 2026-03 | $176 | $598 | **$774** | |
-| 2026-02 | $109 | $313 | **$422** | Short month |
-| 2026-01 | $198 | $668 | **$866** | |
-| 2025-12 | $164 | $552 | **$716** | |
-| 2025-11 | $165 | $571 | **$736** | |
-| 2025-10 | $188 | $644 | **$832** | |
-| 2025-09 | $203 | $675 | **$878** | |
-| 2025-08 | $194 | $706 | **$900** | |
-| 2025-07 | $222 | $811 | **$1,033** | |
-| 2025-06 | $234 | $820 | **$1,054** | |
-| **2025-05** | **$217** | **$804** | **$1,021** | ⚠️ First full month at RI rate |
-| **2025-04** | **$1,810** | **$725** | **$2,535** | ⚠️ Last month at on-demand — RI purchased 23 Apr 2025 |
-| 2025-03 | $2,467 | $759 | **$3,226** | |
-| 2025-02 | $2,236 | $689 | **$2,925** | |
-| 2025-01 | $2,657 | $791 | **$3,448** | |
-| 2024-12 | $2,263 | $673 | **$2,936** | |
-| 2024-11 | $2,370 | $711 | **$3,081** | |
-| 2024-10 | $2,550 | $790 | **$3,340** | |
-| 2024-09 | $2,804 | $868 | **$3,672** | |
-| 2024-08 | $832 | $261 | **$1,093** | Partial — data starts here |
 
 ### Commitment Position — Confirmed 2026-07-29
 

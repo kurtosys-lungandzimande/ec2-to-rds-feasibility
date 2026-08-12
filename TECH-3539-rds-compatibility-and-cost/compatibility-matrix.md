@@ -98,20 +98,20 @@ Both instances are AWS License Included, having moved off SoftCat. There is no B
 
 ## Cost Model
 
-### EC2 Baseline — Confirmed from EW1R-REP-01 Monitoring Data
+### EC2 Baseline — Confirmed 2026-07-29
 
-> Source: `MON_AWS_Entity_Cost` in DBA_VCC_AWS on EW1R-REP-01. Real AWS billing data collected daily. Duplicates removed using MIN per day before summing.
+> Source: Hermann Lotter, TECH-3431 comment, 2026-07-29. March 2026, full 744-hour month, after commitment discounts.
 
-| Period | ew2p-mssql-01/month | ew2p-mssql-02/month | Combined | Notes |
-|---|---|---|---|---|
-| Current (post-RI, May 2025 – present) | ~$165–$234 | ~$640–$820 | **~$800–$950** | RI active on ew2p-mssql-01 since 23 Apr 2025 |
-| Pre-RI (Aug 2024 – Apr 2025) | ~$2,263–$2,804 | ~$640–$820 | **~$2,900–$3,700** | On-demand rate |
-
-> **Reserved Instance confirmed on ew2p-mssql-01:** purchased 23 April 2025, 3-year term most likely, expiry April 2028. The ~$165–$234/month still showing is EBS, data transfer, and SQL Server line items only — compute is covered by the RI. No cost jump in April 2026 rules out a 1-year term.
+| Item | Monthly |
+|---|---|
+| ew2p-mssql-01 — compute and SQL licence | $2,753.92 |
+| ew2p-mssql-02 — compute only (passive node, no SQL licence) | $512.95 |
+| EBS — 5,360 GiB gp3 + provisioned throughput | $532.21 |
+| **Total** | **$3,799.08 (~$45,600/year)** |
 
 ### RDS Cost Estimate — BYOL, db.r6i.2xlarge, Multi-AZ
 
-> Confirmed via AWS Pricing Calculator — eu-west-2, db.r6i.2xlarge, Multi-AZ, BYOL, gp3 2,680 GB. EC2 baseline confirmed from `MON_AWS_Entity_Cost` and `INFO_AWS_EC2_Detail` in DBA_VCC_AWS on EW1R-REP-01 (real AWS billing data collected daily). Full breakdown in [cost-comparison.md](./cost-comparison.md).
+> Source: AWS Pricing Calculator — https://calculator.aws/#/estimate?id=4de608073e6897f7fc21deae0be40bd84e16537d. eu-west-2, db.r6i.2xlarge SQL Ent LI Multi-AZ, gp3 2,680 GB. EC2 baseline from Hermann Lotter, TECH-3431, 2026-07-29. Full breakdown in [cost-comparison.md](./cost-comparison.md).
 
 | Component | Cost/month | Notes |
 |---|---|---|

@@ -239,9 +239,9 @@ A straight lift-and-shift of SQL Server from EC2 to RDS is not possible in its c
 
 ### Cost Conclusion — 2026-07-28
 
-**Source:** Hermann Lotter, TECH-3431 comment, 2026-07-29. Figures measured, not estimated. Cross-checked against Cost Explorer to within 1%.
+**Source:** Hermann Lotter, TECH-3431 comment, 2026-07-29. Figures measured, not estimated.
 
-> ⚠️ Do not use the datalake CUR table for cost baselines on this epic — use Cost Explorer and deduplicated CUR line items only.
+> ⚠️ All cost figures on this epic are sourced to Hermann Lotter, TECH-3431, 2026-07-29, or AWS Pricing Calculator only. Do not use the reporting server datalake (`MON_AWS_Entity_Cost`) for cost figures.
 
 #### Reserved Instance and Savings Plan Position
 
@@ -326,7 +326,7 @@ If non-cost reasons are raised in future (managed patching, HA simplicity, opera
 | Q12 | Are there any RDS Reserved Instance options or private pricing available to close the cost gap? | RDS on-demand is ~$409–$589/month more than current EC2 spend — RI pricing could change the cost case | **Closed — 1yr RI confirmed from AWS public pricing. All Upfront: ~$61,532/yr (~$5,128/month). Partial Upfront: ~$62,788/yr (~$5,232/month). Saves ~$3,300–$4,600/yr off on-demand. Gap vs EC2 ($45,600/yr) still ~$16,000–$17,000/yr more on RDS. Does not change NO-GO.** |
 | Q13 | Has AWS License Mobility been formally activated for RDS previously, or is this a first-time activation? | Administrative step — must be initiated before migration begins regardless of timing | **Closed — moot. Hermann confirmed Kurtosys holds no SQL Server licences with Software Assurance. License Mobility not applicable.** |
 | Q4 | Do we have access to all EC2 instances to run discovery queries directly? | Blocks all of Theme A | **Closed** — access confirmed, queries validated on REL 2026-07-23 |
-| Q5 | What is the current EC2 cost per instance — do we have Cost Explorer access? | Required for Theme B cost comparison | **Closed** — confirmed from `MON_AWS_Entity_Cost` and `INFO_AWS_EC2_Detail` in DBA_VCC_AWS on EW1R-REP-01. No Cost Explorer access needed. See cost-comparison.md. |
+| Q5 | What is the current EC2 cost per instance — do we have Cost Explorer access? | Required for Theme B cost comparison | **Closed** — confirmed from Hermann Lotter, TECH-3431, 2026-07-29. EC2 measured at $3,799.08/month (March 2026). See cost-comparison.md. |
 | Q6 | Are any instances using SQL Server features known to be unsupported on RDS? | Early signal for compatibility blockers | **Closed** — SSIS, SSRS, CmdExec/PowerShell steps, Windows logins all identified on REL |
 | Q7 | What SQL Server versions and editions are currently running across all instances? | Determines RDS engine version options | **Closed** — SQL Server 2019 (15.0.4455.2) CU32, Enterprise Edition confirmed on PRD via OPENQUERY through EW1R-REP-01. REL is Developer Edition. |
 | Q8 | Is BYOL licensing already in place or are instances running License Included on EC2? | Required for licensing comparison in Theme B | **Closed** — BYOL confirmed from LICENSE-EXEMPTION-KSYS-MSSQL-PASSIVE-NODE line item in AWS cost data for ew2p-mssql-02. See inventory.md. |
