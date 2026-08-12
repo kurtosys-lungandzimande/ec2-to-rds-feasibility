@@ -66,7 +66,7 @@
 | A1 | Close TECH-3537, 3538, 3539, 3540 in Jira | Lunga | Pending |
 | A2 | Add closure comment to TECH-3431 — NO-GO recommendation with Hermann's figures | Lunga | Pending |
 | A3 | Get manager sign-off from Jacobus on NO-GO recommendation | Jacobus | Pending |
-| A4 | Confirm AWS EC2 HA programme status — 2022 vs GA feature | Hermann | In Progress |
+| A4 | Confirm AWS EC2 HA programme status — 2022 vs GA feature | Hermann | **Closed — GA confirmed by Lunga** |
 | A5 | If non-cost reasons raised in future — reopen with explicit $37,600/year justification | Platform Engineering | Future |
 
 ---
@@ -292,14 +292,18 @@ Compute Savings Plans cover EC2 but not RDS. The current portfolio runs at >99% 
 
 Any proposed cutover window should align with these end dates to avoid wasting committed spend.
 
-#### Open Dependency — AWS EC2 HA for SQL Server
+#### AWS EC2 HA Programme — Closed
 
-Kurtosys was onboarded onto an AWS programme for SQL Server HA in 2022. AWS launched a public equivalent — [Amazon EC2 High Availability for SQL Server](https://docs.aws.amazon.com/sql-server-ec2/latest/userguide/sql-high-availability.html) — on 2025-11-17. Whether Kurtosys is still on the 2022 programme or has moved to the GA feature needs confirming with the AWS account team. Hermann is picking this up. **Do not assume either way.**
+Kurtosys is on the GA feature — [Amazon EC2 High Availability for SQL Server](https://docs.aws.amazon.com/sql-server-ec2/latest/userguide/sql-high-availability.html) — confirmed by Lunga. Hermann noted the 2022 programme ownership sits with the team that manages the servers day to day, not with him.
 
-#### Still to Verify on the RDS Side
+#### Second RI — Unmatched (Hermann Note)
 
-- Standard RDS Multi-AZ pricing may already carry partial standby licence relief
-- Full passive node exemption on RDS Custom is reported but unconfirmed — and RDS Custom reintroduces much of the operational overhead this epic aims to remove
+Hermann noted two Reserved Instances exist specifically for Windows with SQL Server Enterprise, but only one instance currently bills under that licensed code. ew2p-mssql-02 is covered by a Compute Savings Plan instead. Whether the second RI has a match elsewhere or is sitting idle is unclear — worth checking via console if the team has access. An idle RI is wasted spend.
+
+#### Still to Verify on the RDS Side — Moot (NO-GO)
+
+- Standard RDS Multi-AZ pricing may carry partial standby licence relief — not investigated further given NO-GO
+- Full passive node exemption on RDS Custom is reported but unconfirmed — moot given NO-GO
 
 #### Final Recommendation
 
@@ -319,8 +323,8 @@ If non-cost reasons are raised in future (managed patching, HA simplicity, opera
 | Q9 | Confirm RI term and expiry for ew2p-mssql-01 — believed 3-year purchased 23 Apr 2025, expiry Apr 2028 | Determines the earliest cost-neutral migration window — if 3-year, cannot migrate before Apr 2028 without double-paying | **Closed** — Hermann Lotter confirmed 2026-07-28: no 3-year RI exists, no April 2028 expiry. Assumption was incorrect. |
 | Q10 | Confirm whether ew2p-mssql-02 is also on a Reserved Instance, and if so term and expiry | ew2p-mssql-02 cost has been consistent at ~$640–$820/month — may also be RI-covered | **Closed** — Hermann Lotter confirmed 2026-07-28: no RI on ew2p-mssql-02. |
 | Q11 | Confirm BYOL license commitment — any active license lock-in tied to the EC2 instances? | Need to know if there is any Microsoft license commitment that affects migration timing | **Closed** — Hermann Lotter confirmed 2026-07-28: instances are not BYOL. The passive node (ew2p-mssql-02) runs without a SQL Server licence charge on EC2 — this benefit does not exist on RDS, making RDS ~$30k–$38k/year more expensive. |
-| Q12 | Are there any RDS Reserved Instance options or private pricing available to close the cost gap? | RDS on-demand is ~$409–$589/month more than current EC2 spend — RI pricing could change the cost case | Open — sent to account manager 2026-07-28 |
-| Q13 | Has AWS License Mobility been formally activated for RDS previously, or is this a first-time activation? | Administrative step — must be initiated before migration begins regardless of timing | Open |
+| Q12 | Are there any RDS Reserved Instance options or private pricing available to close the cost gap? | RDS on-demand is ~$409–$589/month more than current EC2 spend — RI pricing could change the cost case | **Closed — moot. NO-GO confirmed. Hermann noted this is public AWS pricing — straightforward to pull if needed in future.** |
+| Q13 | Has AWS License Mobility been formally activated for RDS previously, or is this a first-time activation? | Administrative step — must be initiated before migration begins regardless of timing | **Closed — moot. NO-GO confirmed. Hermann confirmed Kurtosys holds no SQL Server licences with Software Assurance. License Mobility not applicable.** |
 | Q4 | Do we have access to all EC2 instances to run discovery queries directly? | Blocks all of Theme A | **Closed** — access confirmed, queries validated on REL 2026-07-23 |
 | Q5 | What is the current EC2 cost per instance — do we have Cost Explorer access? | Required for Theme B cost comparison | **Closed** — confirmed from `MON_AWS_Entity_Cost` and `INFO_AWS_EC2_Detail` in DBA_VCC_AWS on EW1R-REP-01. No Cost Explorer access needed. See cost-comparison.md. |
 | Q6 | Are any instances using SQL Server features known to be unsupported on RDS? | Early signal for compatibility blockers | **Closed** — SSIS, SSRS, CmdExec/PowerShell steps, Windows logins all identified on REL |

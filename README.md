@@ -15,7 +15,7 @@ Cost case closed by Hermann Lotter 2026-07-29. RDS costs ~$37,600/year more than
 - EC2 measured cost: $3,799.08/month (~$45,600/year) — March 2026, after commitment discounts
 - RDS list cost: ~$6,933/month (~$83,200/year) — db.r6i.2xlarge SQL Ent LI Multi-AZ, eu-west-2
 - Gap: ~$37,600/year more on RDS
-- Pending: manager sign-off (Jacobus) and AWS EC2 HA programme confirmation (Hermann)
+- Pending: manager sign-off (Jacobus)
 
 ---
 
@@ -76,4 +76,4 @@ ec2-to-rds-feasibility/
 | # | Question | Owner | Impact |
 |---|---|---|---|
 | 1 | Manager sign-off on NO-GO recommendation | Jacobus | Epic closure |
-| 2 | AWS EC2 HA programme — 2022 programme vs GA feature (launched 2025-11-17) | Hermann | Confirms current HA arrangement |
+| 2 | AWS EC2 HA programme — 2022 programme vs GA feature (launched 2025-11-17) | Hermann | **Closed — GA confirmed by Lunga** |
