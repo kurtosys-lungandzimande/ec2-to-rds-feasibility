@@ -162,7 +162,8 @@
 
 ## RDS 1-Year RI — db.r6i.2xlarge SQL Ent LI Multi-AZ, eu-west-2
 
-> Source: AWS public pricing API, eu-west-2, confirmed 2026-07-30.
+> Source: AWS public pricing API + AWS Pricing Calculator (independently verified), eu-west-2, confirmed 2026-07-30.
+> **Calculator link:** https://calculator.aws/#/estimate?id=4de608073e6897f7fc21deae0be40bd84e16537d
 
 | Option | Annual | Monthly | Saving vs On-demand |
 |---|---|---|---|
@@ -193,7 +194,7 @@
 | 1 | Manager sign-off on NO-GO recommendation | Jacobus | Open |
 | 2 | AWS EC2 HA programme — 2022 programme vs GA feature (launched 2025-11-17) | Hermann | **Closed — GA confirmed by Lunga** |
 | 3 | Compute Savings Plans — do they cover SQL Server licence? | Lunga | **Closed — No. Compute SPs cover EC2 instance hours only. SQL Server Enterprise licence fee (~$3.43/hr on ew2p-mssql-01) is always billed at on-demand rate regardless of SP or RI. SPs do not apply to RDS — Database Savings Plans are the RDS-side equivalent.** |
-| 4 | RDS 1-year RI ballpark — db.r6i.2xlarge SQL Ent LI Multi-AZ, eu-west-2 | Lunga | **Closed — confirmed from AWS public pricing. All Upfront: ~$61,532/yr (~$5,128/month). Partial Upfront: ~$62,788/yr (~$5,232/month). Saves ~$3,300–$4,600/yr vs on-demand ($66,094/yr). Gap vs EC2 ($45,600/yr) still ~$16,000–$17,000/yr more on RDS. Does not change NO-GO.** |
+| 4 | RDS 1-year RI ballpark — db.r6i.2xlarge SQL Ent LI Multi-AZ, eu-west-2 | Lunga | **Closed — confirmed from AWS Pricing Calculator (https://calculator.aws/#/estimate?id=4de608073e6897f7fc21deae0be40bd84e16537d). All Upfront: ~$61,532/yr (~$5,128/month). Partial Upfront: $31,394 upfront + $2,616.17/month ($71,342/yr total). On-demand: $5,507.85/month ($66,094/yr). Gap vs EC2 ($45,600/yr) still ~$16,000–$25,000/yr more on RDS depending on option. Does not change NO-GO.** |
 
 ---
 
@@ -202,6 +203,7 @@
 | Resource | Location |
 |---|---|
 | AWS Pricing Calculator | [https://calculator.aws](https://calculator.aws) |
+| RDS estimate (verified, clean) | https://calculator.aws/#/estimate?id=4de608073e6897f7fc21deae0be40bd84e16537d |
 | Compatibility matrix | [compatibility-matrix.md](./compatibility-matrix.md) |
 | Inventory and cost source | [inventory.md](../TECH-3538-inventory-and-dependency/inventory.md) |
 | Go/no-go recommendation | [go-no-go-recommendation.md](../TECH-3540-recommendation-and-handover/go-no-go-recommendation.md) |

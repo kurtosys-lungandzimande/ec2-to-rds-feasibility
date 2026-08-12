@@ -164,6 +164,7 @@ These items are excluded from the estimate above to keep it like-for-like agains
 | Resource | Location |
 |---|---|
 | AWS Pricing Calculator | [https://calculator.aws](https://calculator.aws) |
+| Verified estimate (TECH-3539) | https://calculator.aws/#/estimate?id=4de608073e6897f7fc21deae0be40bd84e16537d |
 | Cost comparison doc | [cost-comparison.md](./cost-comparison.md) |
 | Compatibility matrix | [compatibility-matrix.md](./compatibility-matrix.md) |
 | Go/no-go recommendation | [go-no-go-recommendation.md](../TECH-3540-recommendation-and-handover/go-no-go-recommendation.md) |
