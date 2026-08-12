@@ -160,6 +160,20 @@
 
 ---
 
+## RDS 1-Year RI — db.r6i.2xlarge SQL Ent LI Multi-AZ, eu-west-2
+
+> Source: AWS public pricing API, eu-west-2, confirmed 2026-07-30.
+
+| Option | Annual | Monthly | Saving vs On-demand |
+|---|---|---|---|
+| On-demand | ~$66,094 | ~$5,508 | baseline |
+| 1yr Partial Upfront | ~$62,788 | ~$5,232 | ~$3,306/yr |
+| 1yr All Upfront | ~$61,532 | ~$5,128 | ~$4,562/yr |
+
+> The 1-year RI saves ~$3,300–$4,600/yr off the RDS compute side only. The gap vs current EC2 cost ($45,600/yr) is still ~$16,000–$17,000/yr more on RDS. Does not change the NO-GO recommendation.
+
+---
+
 ## What Is Not Included in This Estimate
 
 | Item | Notes |
@@ -178,6 +192,8 @@
 |---|---|---|---|
 | 1 | Manager sign-off on NO-GO recommendation | Jacobus | Open |
 | 2 | AWS EC2 HA programme — 2022 programme vs GA feature (launched 2025-11-17) | Hermann | **Closed — GA confirmed by Lunga** |
+| 3 | Compute Savings Plans — do they cover SQL Server licence? | Lunga | **Closed — No. Compute SPs cover EC2 instance hours only. SQL Server Enterprise licence fee (~$3.43/hr on ew2p-mssql-01) is always billed at on-demand rate regardless of SP or RI. SPs do not apply to RDS — Database Savings Plans are the RDS-side equivalent.** |
+| 4 | RDS 1-year RI ballpark — db.r6i.2xlarge SQL Ent LI Multi-AZ, eu-west-2 | Lunga | **Closed — confirmed from AWS public pricing. All Upfront: ~$61,532/yr (~$5,128/month). Partial Upfront: ~$62,788/yr (~$5,232/month). Saves ~$3,300–$4,600/yr vs on-demand ($66,094/yr). Gap vs EC2 ($45,600/yr) still ~$16,000–$17,000/yr more on RDS. Does not change NO-GO.** |
 
 ---
 
