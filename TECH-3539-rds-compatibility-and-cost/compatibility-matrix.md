@@ -54,7 +54,7 @@ Using the inventory and dependency findings from TECH-3538, assess whether the S
 | Online index operations | Enterprise feature — in use | ✅ Supported on RDS Enterprise | N/A | None |
 | Resource Governor | TBC — low priority | ❌ Not Supported on RDS | Workload management via instance sizing | Low impact unless actively used |
 | SQL Server version (2019) | 2019 (15.0.4455.2) CU32 — confirmed | ✅ RDS supports SQL Server 2019 | N/A | None |
-| Enterprise Edition on RDS | Required — BYOL only | ✅ Supported — BYOL only | N/A | BYOL confirmed — no blocker |
+| Enterprise Edition on RDS | Required — BYOL only | ✅ Supported — BYOL only | N/A | **Not viable** — Kurtosys holds no SQL Server licences with Software Assurance. BYOL on RDS is not an option. |
 
 ---
 
@@ -109,18 +109,11 @@ Both instances are AWS License Included, having moved off SoftCat. There is no B
 | EBS — 5,360 GiB gp3 + provisioned throughput | $532.21 |
 | **Total** | **$3,799.08 (~$45,600/year)** |
 
-### RDS Cost Estimate — BYOL, db.r6i.2xlarge, Multi-AZ
+### RDS Cost Estimate — License Included, db.r6i.2xlarge SQL Ent LI Multi-AZ, eu-west-2
 
 > Source: AWS Pricing Calculator — https://calculator.aws/#/estimate?id=4de608073e6897f7fc21deae0be40bd84e16537d. eu-west-2, db.r6i.2xlarge SQL Ent LI Multi-AZ, gp3 2,680 GB. EC2 baseline from Hermann Lotter, TECH-3431, 2026-07-29. Full breakdown in [cost-comparison.md](./cost-comparison.md).
 
-| Component | Cost/month | Notes |
-|---|---|---|
-| RDS db.r6i.2xlarge — Multi-AZ (BYOL) | ~$714 | Single Multi-AZ rate covers both primary and standby — compute only, no license cost on AWS bill |
-| Storage — gp3, 2,680 GB | ~$370 | $0.138/GB-month on RDS gp3 — billed once for Multi-AZ |
-| Automated backup storage — 2,680 GB | ~$255 | First 100% of DB size free — overage at $0.095/GB-month |
-| **Total estimated** | **~$1,339–$1,389/month** | Both nodes via Multi-AZ — on-demand pricing |
-
-> **Correction:** An earlier estimate of $2,000–$2,500/month doubled per-node compute. Multi-AZ on RDS is billed as a single instance at the Multi-AZ rate — storage and backup are charged once. Corrected figure is ~$1,339–$1,389/month on-demand.
+> Note: BYOL is not an option — Kurtosys holds no SQL Server licences with Software Assurance (Hermann confirmed 2026-08-06). RDS pricing is License Included.
 
 ### EC2 vs RDS — Full Comparison (updated 2026-08-06)
 
@@ -167,7 +160,6 @@ Both instances are AWS License Included, having moved off SoftCat. There is no B
 
 - TECH-3538 complete — ✅ PRD instance data confirmed
 - OPENQUERY via EW1R-REP-01 linked servers — ✅ used to resolve all compatibility blockers 2026-07-24
-- Manager confirmation — AWS License Mobility activation status
 
 ---
 
@@ -191,4 +183,4 @@ Both instances are AWS License Included, having moved off SoftCat. There is no B
 | Compute Savings Plans pricing | [aws.amazon.com/savingsplans/compute-pricing](https://aws.amazon.com/savingsplans/compute-pricing/) | Confirms SPs apply to EC2 compute rate only |
 | Savings Plans — what is covered | [docs.aws.amazon.com/savingsplans/latest/userguide/what-is-savings-plans.html](https://docs.aws.amazon.com/savingsplans/latest/userguide/what-is-savings-plans.html) | Confirms SQL Server licence fee is always on-demand regardless of SP coverage |
 | AWS Pricing Calculator | [calculator.aws](https://calculator.aws/pricing/2/home) | Build and share RDS cost model for Jacobus sign-off |
-| EC2 HA for SQL Server (GA feature) | [docs.aws.amazon.com/sql-server-ec2/latest/userguide/sql-high-availability.html](https://docs.aws.amazon.com/sql-server-ec2/latest/userguide/sql-high-availability.html) | GA feature launched 2025-11-17 — Platform Engineering to confirm which programme Kurtosys is on |
+| EC2 HA for SQL Server (GA feature) | [docs.aws.amazon.com/sql-server-ec2/latest/userguide/sql-high-availability.html](https://docs.aws.amazon.com/sql-server-ec2/latest/userguide/sql-high-availability.html) | GA feature — Kurtosys confirmed on GA programme (Lunga, 2026-07-29) |
