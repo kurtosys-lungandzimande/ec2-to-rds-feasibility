@@ -135,7 +135,7 @@ Both instances are AWS License Included, having moved off SoftCat. There is no B
 | EC2 SQL Server Version | RDS Support | Notes |
 |---|---|---|
 | SQL Server 2019 (15.0.4455.2) CU32 | Supported | RDS supports SQL Server 2019 — minor version managed by AWS |
-| SQL Server 2019 Enterprise Edition | Supported — BYOL only | Confirmed viable |
+| SQL Server 2019 Enterprise Edition | Supported — BYOL only | Not viable on RDS — Kurtosys holds no SQL Server licences with Software Assurance |
 
 ---
 
@@ -144,7 +144,7 @@ Both instances are AWS License Included, having moved off SoftCat. There is no B
 - [x] Confirmed inputs from TECH-3538 documented — instance type, edition, BYOL, storage, cost baseline
 - [x] Feature compatibility matrix completed for known features — Supported / Not Supported / Workaround
 - [x] Compatibility blockers listed — all 7 assessed and resolved 2026-07-24
-- [x] Licensing analysis completed — BYOL confirmed, License Mobility noted
+- [x] Licensing analysis completed — AWS License Included confirmed, BYOL not viable, License Mobility not applicable
 - [x] Cost model populated — EC2 baseline confirmed, RDS estimate calculated, saving quantified
 - [x] RDS engine version support confirmed against current EC2 SQL Server version
 - [x] Compatibility blockers 1–6 resolved via OPENQUERY through EW1R-REP-01 linked servers
