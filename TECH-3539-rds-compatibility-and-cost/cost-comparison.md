@@ -142,9 +142,7 @@
 | EC2 today (after commitments) | $38,413 | $6,387 | ~$45,600 |
 | RDS SQL Ent LI Multi-AZ (list) | $66,094 | $17,109 | ~$83,200 |
 
-> Storage is the larger swing — same 5,360 GiB moves from $532/month on EBS ($0.093/GB-month) to $1,426/month on RDS ($0.266/GB-month for a SQL Server mirror).
->
-> Standard RDS Multi-AZ pricing may carry partial standby licence relief — not investigated further given NO-GO. Full passive node exemption on RDS Custom is reported but unconfirmed — moot given NO-GO.
+> Storage is the larger swing — same 5,360 GiB moves from $532/month on EBS ($0.093/GB-month) to $1,426/month on RDS ($0.266/GB-month for a SQL Server mirror). Source: Hermann Lotter, TECH-3431, 2026-07-29.
 
 ---
 
@@ -156,7 +154,7 @@
 | RDS SQL Ent LI Multi-AZ (list) | $66,094 | $17,109 | ~$83,200 |
 | **Difference** | | | **~$37,600/year more on RDS** |
 
-> The low end of the gap (~$30,000/year) assumes RDS picks up commitment discounts comparable to today. Backups and snapshots excluded on both sides.
+> Backups and snapshots excluded on both sides — consistent with Hermann's figures. Gap is based on list pricing for RDS vs measured EC2 cost. Source: Hermann Lotter, TECH-3431, 2026-07-29.
 
 ---
 
