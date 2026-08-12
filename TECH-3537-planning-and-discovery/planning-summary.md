@@ -296,9 +296,9 @@ Any proposed cutover window should align with these end dates to avoid wasting c
 
 Kurtosys is on the GA feature — [Amazon EC2 High Availability for SQL Server](https://docs.aws.amazon.com/sql-server-ec2/latest/userguide/sql-high-availability.html) — confirmed by Lunga. Hermann noted the 2022 programme ownership sits with the team that manages the servers day to day, not with him.
 
-#### Second RI — Unmatched (Hermann Note)
+#### Second RI — Closed
 
-Hermann noted two Reserved Instances exist specifically for Windows with SQL Server Enterprise, but only one instance currently bills under that licensed code. ew2p-mssql-02 is covered by a Compute Savings Plan instead. Whether the second RI has a match elsewhere or is sitting idle is unclear — worth checking via console if the team has access. An idle RI is wasted spend.
+Hermann noted two Reserved Instances exist for Windows with SQL Server Enterprise, but only one instance bills under that licensed code. ew2p-mssql-02 is covered by a Compute Savings Plan instead. The second RI is waived — confirmed by Lunga. Not wasted spend.
 
 #### Still to Verify on the RDS Side — Moot (NO-GO)
 
