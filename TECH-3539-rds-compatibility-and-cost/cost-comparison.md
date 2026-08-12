@@ -63,10 +63,10 @@
 
 | Disk | Size | Encrypted | Notes |
 |---|---|---|---|
-| OS disk | 80 GB | ❌ Unencrypted | Compliance finding — must be addressed before or during migration |
-| Data disk 1 | 1,400 GB | ✅ Encrypted | Primary data volume |
-| Data disk 2 | 800 GB | ✅ Encrypted | Secondary data volume |
-| Data disk 3 | 400 GB | ✅ Encrypted | Log / tempdb volume |
+| OS disk | 80 GB | Unencrypted | Compliance finding — must be addressed before or during migration |
+| Data disk 1 | 1,400 GB | Encrypted | Primary data volume |
+| Data disk 2 | 800 GB | Encrypted | Secondary data volume |
+| Data disk 3 | 400 GB | Encrypted | Log / tempdb volume |
 | **Total** | **2,680 GB** | Partial | OS disk unencrypted — 3 data disks encrypted |
 
 > Only the 3 data disks (2,600 GB) are migrated to RDS. The OS disk is not migrated — RDS manages its own OS. 2,680 GB is used as a conservative round figure for RDS storage sizing.

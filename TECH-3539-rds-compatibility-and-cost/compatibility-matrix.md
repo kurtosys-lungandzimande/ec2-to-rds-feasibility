@@ -34,27 +34,27 @@ Using the inventory and dependency findings from TECH-3538, assess whether the S
 
 | Feature | In Use on EC2 | RDS Support | Workaround | Impact |
 |---|---|---|---|---|
-| SQL Agent Jobs — T-SQL steps | Yes — confirmed | ✅ Supported | N/A | None |
-| SQL Agent Jobs — CmdExec / PowerShell steps | Yes — DBA maintenance jobs only (Ola Hallengren + S3 upload checks) | ❌ Not Supported | RDS manages CHECKDB, backups, reindex automatically — jobs retired, not migrated | Not a blocker — all CmdExec/PowerShell steps are DBA maintenance that RDS replaces |
-| SQL Agent Jobs — SSIS steps | No SSIS Agent steps found — SSISDB exists but not used in Agent jobs | ❌ Not Supported | N/A | Not a blocker |
-| Always On Availability Groups | Yes — primary/secondary confirmed | ✅ Supported via RDS Multi-AZ | Use RDS Multi-AZ deployment | None — RDS Multi-AZ replaces Always On |
-| Linked Servers | One linked server — UDM_MEM pointing at decommissioned MemSQL | ❌ Not Supported on RDS | Drop UDM_MEM before migration | Not a blocker — dead linked server, safe to drop |
-| CLR — Safe assemblies | Yes — EmailReportNotifications.XmlSerializers (SECURITYBENEFIT, RWC) | ✅ Supported | N/A | None |
-| CLR — External / Unsafe assemblies | **Yes — 25 UNSAFE assemblies in SECURITYBENEFIT and RWC** (EmailReportNotifications, SHA1StringFunction, System.Drawing, System.Windows.Forms etc.) | ❌ Not Supported | Rewrite SHA1StringFunction as T-SQL HASHBYTES. Rewrite EmailReportNotifications using SES/SNS. Or keep SECURITYBENEFIT and RWC on EC2. | **Hard blocker — SECURITYBENEFIT and RWC cannot migrate to RDS without remediation** |
-| Cross-database queries | No real cross-database dependencies found — false positives only (single-letter variable references) | ❌ Not Supported | N/A | Not a blocker |
-| Windows Authentication / AD logins | 10 Windows logins — all service accounts (NT Service\*, SHPRD\sqlsrv, SHPRD\ssis) and DBA access. 51 SQL logins for all application accounts. | ❌ Not Supported (standard RDS) | Replace SHPRD\* DBA logins with SQL logins on RDS. Service accounts not needed on RDS. | Not a blocker — application already uses SQL auth |
-| Database Mail | **Confirmed in use** — profile `dba`, account `dba@kurtosys.com`, SMTP via EW2P-MSSQL-01 | ❌ Not Supported | Replace with Amazon SES or SNS wired to SQL Agent alerts | Needs replacement before migration — medium effort |
-| FILESTREAM / FILETABLE | Not in use — all databases returned NULL | ❌ Not Supported | N/A | Not a blocker |
-| SSRS (SQL Server Reporting Services) | **Confirmed installed** — ReportServer and ReportServerTempDB present on instance | ❌ Not Supported | Move SSRS to separate EC2, or migrate to Power BI / QuickSight | **Hard blocker — SSRS must be moved off the instance before migration** |
-| Backup to local disk | TBC — backup history query pending | ❌ Not Supported | S3 only (native RDS backup) | Process change — not a blocker |
-| Custom collation | `Latin1_General_CI_AS` confirmed on PRD (19 of 20 databases). ReportServer uses `Latin1_General_100_CI_AS_KS_WS`. SSISDB uses `SQL_Latin1_General_CP1_CI_AS`. | ✅ Supported at DB creation | Set `Latin1_General_CI_AS` at RDS instance provisioning time | Must be set correctly at provisioning — not a blocker |
-| CHECKDB | Manual on EC2 | ✅ Managed by RDS automatically | N/A | Improvement — no action needed |
-| Transparent Data Encryption (TDE) | TBC | ✅ Supported | N/A | None |
-| Data compression | Enterprise feature — in use | ✅ Supported on RDS Enterprise | N/A | None |
-| Online index operations | Enterprise feature — in use | ✅ Supported on RDS Enterprise | N/A | None |
-| Resource Governor | TBC — low priority | ❌ Not Supported on RDS | Workload management via instance sizing | Low impact unless actively used |
-| SQL Server version (2019) | 2019 (15.0.4455.2) CU32 — confirmed | ✅ RDS supports SQL Server 2019 | N/A | None |
-| Enterprise Edition on RDS | Required — BYOL only | ✅ Supported — BYOL only | N/A | **Not viable** — Kurtosys holds no SQL Server licences with Software Assurance. BYOL on RDS is not an option. |
+| SQL Agent Jobs — T-SQL steps | Yes — confirmed | Supported | N/A | None |
+| SQL Agent Jobs — CmdExec / PowerShell steps | Yes — DBA maintenance jobs only (Ola Hallengren + S3 upload checks) | Not Supported | RDS manages CHECKDB, backups, reindex automatically — jobs retired, not migrated | Not a blocker — all CmdExec/PowerShell steps are DBA maintenance that RDS replaces |
+| SQL Agent Jobs — SSIS steps | No SSIS Agent steps found — SSISDB exists but not used in Agent jobs | Not Supported | N/A | Not a blocker |
+| Always On Availability Groups | Yes — primary/secondary confirmed | Supported via RDS Multi-AZ | Use RDS Multi-AZ deployment | None — RDS Multi-AZ replaces Always On |
+| Linked Servers | One linked server — UDM_MEM pointing at decommissioned MemSQL | Not Supported on RDS | Drop UDM_MEM before migration | Not a blocker — dead linked server, safe to drop |
+| CLR — Safe assemblies | Yes — EmailReportNotifications.XmlSerializers (SECURITYBENEFIT, RWC) | Supported | N/A | None |
+| CLR — External / Unsafe assemblies | **Yes — 25 UNSAFE assemblies in SECURITYBENEFIT and RWC** (EmailReportNotifications, SHA1StringFunction, System.Drawing, System.Windows.Forms etc.) | Not Supported | Rewrite SHA1StringFunction as T-SQL HASHBYTES. Rewrite EmailReportNotifications using SES/SNS. Or keep SECURITYBENEFIT and RWC on EC2. | **Hard blocker — SECURITYBENEFIT and RWC cannot migrate to RDS without remediation** |
+| Cross-database queries | No real cross-database dependencies found — false positives only (single-letter variable references) | Not Supported | N/A | Not a blocker |
+| Windows Authentication / AD logins | 10 Windows logins — all service accounts (NT Service\*, SHPRD\sqlsrv, SHPRD\ssis) and DBA access. 51 SQL logins for all application accounts. | Not Supported (standard RDS) | Replace SHPRD\* DBA logins with SQL logins on RDS. Service accounts not needed on RDS. | Not a blocker — application already uses SQL auth |
+| Database Mail | **Confirmed in use** — profile `dba`, account `dba@kurtosys.com`, SMTP via EW2P-MSSQL-01 | Not Supported | Replace with Amazon SES or SNS wired to SQL Agent alerts | Needs replacement before migration — medium effort |
+| FILESTREAM / FILETABLE | Not in use — all databases returned NULL | Not Supported | N/A | Not a blocker |
+| SSRS (SQL Server Reporting Services) | **Confirmed installed** — ReportServer and ReportServerTempDB present on instance | Not Supported | Move SSRS to separate EC2, or migrate to Power BI / QuickSight | **Hard blocker — SSRS must be moved off the instance before migration** |
+| Backup to local disk | TBC — backup history query pending | Not Supported | S3 only (native RDS backup) | Process change — not a blocker |
+| Custom collation | `Latin1_General_CI_AS` confirmed on PRD (19 of 20 databases). ReportServer uses `Latin1_General_100_CI_AS_KS_WS`. SSISDB uses `SQL_Latin1_General_CP1_CI_AS`. | Supported at DB creation | Set `Latin1_General_CI_AS` at RDS instance provisioning time | Must be set correctly at provisioning — not a blocker |
+| CHECKDB | Manual on EC2 | Managed by RDS automatically | N/A | Improvement — no action needed |
+| Transparent Data Encryption (TDE) | TBC | Supported | N/A | None |
+| Data compression | Enterprise feature — in use | Supported on RDS Enterprise | N/A | None |
+| Online index operations | Enterprise feature — in use | Supported on RDS Enterprise | N/A | None |
+| Resource Governor | TBC — low priority | Not Supported on RDS | Workload management via instance sizing | Low impact unless actively used |
+| SQL Server version (2019) | 2019 (15.0.4455.2) CU32 — confirmed | RDS supports SQL Server 2019 | N/A | None |
+| Enterprise Edition on RDS | Required — BYOL only | Supported — BYOL only | N/A | **Not viable** — Kurtosys holds no SQL Server licences with Software Assurance. BYOL on RDS is not an option. |
 
 ---
 
@@ -64,13 +64,13 @@ All blockers assessed 2026-07-24 via OPENQUERY through EW1R-REP-01 linked server
 
 | # | Blocker | Status | Finding | Action Required |
 |---|---|---|---|---|
-| 1 | Cross-database queries | ✅ Closed | No real cross-database dependencies found — false positives only | None |
-| 2 | Linked servers (PRD outbound) | ✅ Closed | One dead linked server — UDM_MEM pointing at decommissioned MemSQL | Drop UDM_MEM before migration |
-| 3 | Windows Authentication / AD logins | ✅ Closed | All application logins are SQL auth. Windows logins are service accounts only. | Replace SHPRD\* DBA logins with SQL logins on RDS |
-| 4 | CmdExec / PowerShell SQL Agent steps | ✅ Closed | All DBA maintenance jobs (Ola Hallengren + S3 checks) — RDS replaces entirely | Retire jobs — no migration needed |
-| 5 | SSIS job steps | ✅ Closed | No SSIS steps in Agent jobs — SSISDB present but not used in scheduled jobs | Confirm SSISDB usage with application team |
-| 6 | CLR Unsafe assemblies | ⚠️ **Hard blocker** | 25 UNSAFE assemblies in SECURITYBENEFIT and RWC — EmailReportNotifications, SHA1StringFunction + .NET framework dependencies | Rewrite SHA1StringFunction as T-SQL HASHBYTES. Rewrite or replace EmailReportNotifications. Or keep both databases on EC2. |
-| 7 | SSRS | ⚠️ **Hard blocker** | ReportServer and ReportServerTempDB confirmed on instance | Move SSRS to separate EC2 or migrate to Power BI / QuickSight before migration |
+| 1 | Cross-database queries | Closed | No real cross-database dependencies found — false positives only | None |
+| 2 | Linked servers (PRD outbound) | Closed | One dead linked server — UDM_MEM pointing at decommissioned MemSQL | Drop UDM_MEM before migration |
+| 3 | Windows Authentication / AD logins | Closed | All application logins are SQL auth. Windows logins are service accounts only. | Replace SHPRD\* DBA logins with SQL logins on RDS |
+| 4 | CmdExec / PowerShell SQL Agent steps | Closed | All DBA maintenance jobs (Ola Hallengren + S3 checks) — RDS replaces entirely | Retire jobs — no migration needed |
+| 5 | SSIS job steps | Closed | No SSIS steps in Agent jobs — SSISDB present but not used in scheduled jobs | Confirm SSISDB usage with application team |
+| 6 | CLR Unsafe assemblies | Hard blocker | 25 UNSAFE assemblies in SECURITYBENEFIT and RWC — EmailReportNotifications, SHA1StringFunction + .NET framework dependencies | Rewrite SHA1StringFunction as T-SQL HASHBYTES. Rewrite or replace EmailReportNotifications. Or keep both databases on EC2. |
+| 7 | SSRS | Hard blocker | ReportServer and ReportServerTempDB confirmed on instance | Move SSRS to separate EC2 or migrate to Power BI / QuickSight before migration |
 
 **Additional findings confirmed:**
 - Database Mail in use (`dba` profile, `dba@kurtosys.com`) — replace with SES/SNS before migration
@@ -89,8 +89,8 @@ Both instances are AWS License Included, having moved off SoftCat. There is no B
 
 | Option | Available for Enterprise on RDS | Status |
 |---|---|---|
-| License Included | ❌ Not available for Enterprise on RDS | Not applicable |
-| BYOL | ✅ Available | Not viable — Kurtosys holds no SQL Server licences with Software Assurance. Confirmed by Hermann 2026-08-06. |
+| License Included | Not available for Enterprise on RDS | Not applicable |
+| BYOL | Available | Not viable — Kurtosys holds no SQL Server licences with Software Assurance. Confirmed by Hermann 2026-08-06. |
 
 > **Implication:** The licence model is a contributing factor to the NO-GO recommendation. The passive node (ew2p-mssql-02) currently bills at the plain Windows rate ($0.96/hr) with no SQL Server licence charge — worth ~$26,000/year. This exemption does not exist on RDS.
 
@@ -134,8 +134,8 @@ Both instances are AWS License Included, having moved off SoftCat. There is no B
 
 | EC2 SQL Server Version | RDS Support | Notes |
 |---|---|---|
-| SQL Server 2019 (15.0.4455.2) CU32 | ✅ Supported | RDS supports SQL Server 2019 — minor version managed by AWS |
-| SQL Server 2019 Enterprise Edition | ✅ Supported — BYOL only | Confirmed viable |
+| SQL Server 2019 (15.0.4455.2) CU32 | Supported | RDS supports SQL Server 2019 — minor version managed by AWS |
+| SQL Server 2019 Enterprise Edition | Supported — BYOL only | Confirmed viable |
 
 ---
 
@@ -158,8 +158,8 @@ Both instances are AWS License Included, having moved off SoftCat. There is no B
 
 ## Dependencies
 
-- TECH-3538 complete — ✅ PRD instance data confirmed
-- OPENQUERY via EW1R-REP-01 linked servers — ✅ used to resolve all compatibility blockers 2026-07-24
+- TECH-3538 complete — PRD instance data confirmed
+- OPENQUERY via EW1R-REP-01 linked servers — used to resolve all compatibility blockers 2026-07-24
 
 ---
 
