@@ -86,7 +86,7 @@ RDS does not support Database Mail. Before migration, this needs to be replaced 
 
 **Source:** Hermann Lotter, TECH-3431 comment, 2026-07-29. 1-year RI figures from AWS Pricing Calculator, confirmed 2026-08-06. All figures measured, not estimated.
 
-> ⚠️ The original cost figures in this document were based on incorrect assumptions. All figures below are the corrected, confirmed numbers.
+> NOTE: The original cost figures in this document were based on incorrect assumptions. All figures below are the corrected, confirmed numbers.
 
 **Measured EC2 cost — March 2026 (744-hour month, after commitment discounts):**
 
@@ -130,7 +130,7 @@ RDS does not offer License Included for Enterprise Edition — BYOL is the only 
 
 ## Phased Migration Plan
 
-> ⚠️ **This plan is documented for future reference only. It does not represent current intent.** The recommendation is NO-GO — stay on EC2. This plan would only become relevant if the reassess-when conditions in the risk register are triggered. See [risk-register.md](./risk-register.md) for the full list of conditions under which this decision should be revisited.
+> NOTE: This plan is documented for future reference only. It does not represent current intent. The recommendation is NO-GO — stay on EC2. This plan would only become relevant if the reassess-when conditions in the risk register are triggered. See [risk-register.md](./risk-register.md) for the full list of conditions under which this decision should be revisited.
 
 | Phase | What Happens | Why This Order |
 |---|---|---|
